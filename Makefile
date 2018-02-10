@@ -1,21 +1,35 @@
-CC = g++
-CFLAGS = -g
+CPP = g++
+CPPFLAGS = -g
+
+MEMORY_FLAG = -DMEMORY_CHECK
 
 INCLUDE := src
 SOURCE := $(wildcard test_src/*.cpp)
 OBJ := $(addprefix build/obj/, $(notdir $(SOURCE:.cpp=.o)))
+MEMORY_OBJ := $(addprefix build/mem_obj/, $(notdir $(SOURCE:.cpp=.o)))
+
 EXE := build/test
+MEMORY_EXE := build/mem_test
 
 all: $(EXE)
 
 run: $(EXE)
 	./$(EXE)
 
+mem_check: $(MEMORY_EXE)
+	valgrind ./$(MEMORY_EXE)
+
 $(EXE): build $(OBJ)
-	$(CC) $(CFLAGS) -o $(EXE) $(OBJ)
+	$(CPP) $(CPPFLAGS) -o $(EXE) $(OBJ)
+
+$(MEMORY_EXE): build $(MEMORY_OBJ)
+	$(CPP) $(CPPFLAGS) -o $(MEMORY_EXE) $(MEMORY_OBJ)
+
+build/mem_obj/%.o: test_src/%.cpp
+	$(CPP) $(CPPFLAGS) $(MEMORY_FLAG) -I$(INCLUDE) -c -o $@ $<
 
 build/obj/%.o: test_src/%.cpp
-	$(CC) $(CFLAGS) -I$(INCLUDE) -c -o $@ $<
+	$(CPP) $(CPPFLAGS) -I$(INCLUDE) -c -o $@ $<
 
 .PHONY: clean
 clean:
@@ -23,4 +37,4 @@ clean:
 
 .PHONY: build
 build:
-	@if [ ! -d "build" ]; then mkdir build && mkdir build/obj; fi
+	@if [ ! -d "build" ]; then mkdir build && mkdir build/obj && mkdir build/mem_obj; fi
