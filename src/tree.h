@@ -13,25 +13,23 @@ class Tree {
                 Node *right;
 
                 Node();
-                Node(ItemType value);
-                Node(ItemType value, Node *parent);
-
-//                ~Node();
+                Node(const ItemType& value);
+                Node(const ItemType& value, Node *parent);
         };
 
         Node *root;
 
         void real_delete(Node *leaf);
 
-        Node *real_insert(Node *leaf, Node *parent, ItemType value);
-        Node *real_erase(Node *leaf, ItemType value);
+        Node *real_insert(Node *leaf, Node *parent, const ItemType& value);
+        Node *real_erase(Node *leaf, const ItemType& value);
 
-        Node *real_search(Node *leaf, ItemType value);
+        Node *real_search(Node *leaf, const ItemType& value) const;
 
-        Node *min(Node *leaf);
-        Node *max(Node *leaf);
+        Node *min(Node *leaf) const;
+        Node *max(Node *leaf) const;
 
-        void real_print(Node *leaf);
+        void real_print(Node *leaf) const;
 
     public:
         class Iterator {
@@ -61,19 +59,265 @@ class Tree {
                 bool operator!=(const Iterator &iterator) const;
         };
 
+        class ConstIterator {
+            private:
+                Node *current;
+
+                void increment();
+                void decrement();
+
+            public:
+                ConstIterator();
+                ConstIterator(Node *node);
+                ConstIterator(const ConstIterator &iterator);
+
+                ConstIterator& operator=(const ConstIterator &iterator);
+
+                ConstIterator operator++();
+                ConstIterator operator++(int);
+
+                ConstIterator operator--();
+                ConstIterator operator--(int);
+
+                const Node &operator*() const;
+                const Node *operator->() const;
+
+                bool operator==(const ConstIterator &iterator) const;
+                bool operator!=(const ConstIterator &iterator) const;
+        };
+
         Tree();
+        Tree(const Tree& other);
+        
+        Tree& operator=(const Tree& other);
+
         ~Tree();
 
-        void insert(ItemType value);
-        void erase(ItemType value);
+        void insert(const ItemType& value);
+        void erase(const ItemType& value);
 
-        Node *search(ItemType value);
+        Node *search(const ItemType& value) const;
 
-        void print();
+        void print() const;
 
         Iterator begin();
         Iterator end();
+
+        ConstIterator cbegin() const;
+        ConstIterator cend() const;
 };
+
+template <typename ItemType>
+Tree<ItemType>::Node::Node() {
+    this->value = ItemType();
+
+    this->parent = nullptr;
+
+    this->left = nullptr;
+    this->right = nullptr;
+}
+
+template <typename ItemType>
+Tree<ItemType>::Node::Node(const ItemType& value) {
+    this->value = value;
+
+    this->parent = nullptr;
+
+    this->left = nullptr;
+    this->right = nullptr;
+}
+
+template <typename ItemType>
+Tree<ItemType>::Node::Node(const ItemType& value, Node* parent) {
+    this->value = value;
+
+    this->parent = parent;
+
+    this->left = nullptr;
+    this->right = nullptr;
+}
+
+template <typename ItemType>
+Tree<ItemType>::Tree() {
+    this->root = nullptr;
+}
+
+template <typename ItemType>
+Tree<ItemType>::Tree(const Tree &other) {
+    this->root = nullptr;
+
+    for (auto it = other.cbegin(); it != other.cend(); it++)
+        this->insert(it->value);
+
+}
+
+template <typename ItemType>
+Tree<ItemType>& Tree<ItemType>::operator=(const Tree &other) {
+    this->real_delete(this->root);
+
+    this->root = nullptr;
+
+    for (auto it = other.cbegin(); it != other.cend(); it++)
+        this->insert(it->value);
+}
+
+template <typename ItemType>
+void Tree<ItemType>::real_delete(Tree<ItemType>::Node *leaf) {
+    if (leaf != nullptr) {
+        this->real_delete(leaf->left);
+        this->real_delete(leaf->right);
+
+        delete leaf;
+    }
+}
+
+template <typename ItemType>
+Tree<ItemType>::~Tree() {
+    this->real_delete(this->root);
+}
+
+template <typename ItemType>
+typename Tree<ItemType>::Node* Tree<ItemType>::real_insert(Tree<ItemType>::Node *leaf, Tree<ItemType>::Node *parent, const ItemType& value) {
+    if (leaf == nullptr)
+        leaf = new Node(value, parent);
+    else if (value < leaf->value)
+        leaf->left = real_insert(leaf->left, leaf, value);
+    else if (value > leaf->value)
+        leaf->right = real_insert(leaf->right, leaf, value);
+
+    return leaf;
+}
+
+template <typename ItemType>
+void Tree<ItemType>::insert(const ItemType& value) {
+    this->root = this->real_insert(this->root, this->root, value);
+}
+
+template <typename ItemType>
+typename Tree<ItemType>::Node* Tree<ItemType>::min(Tree<ItemType>::Node *leaf) const {
+    if (leaf == nullptr)
+        return nullptr;
+    else if (leaf->left == nullptr)
+        return leaf;
+    else 
+        return min(leaf->left);
+}
+
+template <typename ItemType>
+typename Tree<ItemType>::Node* Tree<ItemType>::max(Tree<ItemType>::Node *leaf) const {
+    if (leaf == nullptr)
+        return nullptr;
+    else if (leaf->right == nullptr)
+        return leaf;
+    else
+        return max(leaf->right);
+}
+
+template <typename ItemType>
+typename Tree<ItemType>::Node* Tree<ItemType>::real_erase(Tree<ItemType>::Node *leaf, const ItemType &value) {
+    if (leaf == nullptr)
+        return nullptr;
+    else if (value < leaf->value)
+        leaf->left = real_erase(leaf->left, value);
+    else if (value > leaf->value)
+        leaf->right = real_erase(leaf->right, value);
+    else if (leaf->left == nullptr && leaf->right == nullptr) {
+        delete leaf;
+
+        leaf = nullptr;
+    } else if (leaf->right == nullptr) {
+        auto parent = leaf->parent;
+        auto left = leaf->left;
+
+        delete leaf;
+
+        leaf = left;
+        leaf->parent = parent;
+    } else if (leaf->left == nullptr) {
+        auto parent = leaf->parent;
+        auto right = leaf->right;
+
+        delete leaf;
+
+        leaf = right;
+        leaf->parent = parent;
+    } else {
+        auto temp = max(leaf->left);
+        auto parent = temp->parent;
+
+        leaf->value = temp->value;
+
+        if (parent != leaf)
+            parent->right = temp->left;
+        else
+            leaf->left = temp->left;
+
+        delete temp;
+        temp = nullptr;
+    }
+
+    return leaf;
+}
+
+template <typename ItemType>
+void Tree<ItemType>::erase(const ItemType &value) {
+    this->root = this->real_erase(this->root, value);
+}
+
+template <typename ItemType>
+typename Tree<ItemType>::Node* Tree<ItemType>::real_search(Tree<ItemType>::Node *leaf, const ItemType &value) const {
+    if (leaf == nullptr || leaf->value == value)
+        return leaf;
+
+    if (value < leaf->value)
+        return real_search(leaf->left, value);
+
+    return real_search(leaf->right, value);
+}
+
+template <typename ItemType>
+typename Tree<ItemType>::Node* Tree<ItemType>::search(const ItemType &value) const {
+    return this->real_search(this->root, value);
+}
+
+template <typename ItemType>
+void Tree<ItemType>::real_print(Tree<ItemType>::Node *leaf) const {
+    if (leaf != nullptr) {
+        real_print(leaf->left);
+
+        std::cout << leaf->value << std::endl;
+
+        if (leaf->parent != nullptr)
+            std::cout << "PARENT -> " << leaf->parent->value << std::endl;
+        else 
+            std::cout << "ROOT" << std::endl;
+
+        std::cout << "LEFT -> ";
+
+        if (leaf->left != nullptr)
+            std::cout << leaf->left->value << std::endl;
+        else 
+            std::cout << "NOTHING" << std::endl;
+
+        std::cout << "RIGHT -> ";
+
+        if (leaf->right != nullptr)
+            std::cout << leaf->right->value << std::endl;
+        else 
+            std::cout << "NOTHING" << std::endl;
+
+        std::cout << std::endl;
+
+        real_print(leaf->right);
+    }
+}
+
+template <typename ItemType>
+void Tree<ItemType>::print() const {
+    this->real_print(root);
+
+    std::cout << std::endl;
+}
 
 template <typename ItemType>
 Tree<ItemType>::Iterator::Iterator() {
@@ -202,206 +446,127 @@ typename Tree<ItemType>::Iterator Tree<ItemType>::end() {
 }
 
 template <typename ItemType>
-Tree<ItemType>::Node::Node() {
-    this->value = ItemType();
-
-    this->parent = nullptr;
-
-    this->left = nullptr;
-    this->right = nullptr;
+Tree<ItemType>::ConstIterator::ConstIterator() {
+    this->current = nullptr;
 }
 
 template <typename ItemType>
-Tree<ItemType>::Node::Node(ItemType value) {
-    this->value = value;
-
-    this->parent = nullptr;
-
-    this->left = nullptr;
-    this->right = nullptr;
+Tree<ItemType>::ConstIterator::ConstIterator(typename Tree<ItemType>::Node *node) {
+    this->current = node;
 }
 
 template <typename ItemType>
-Tree<ItemType>::Node::Node(ItemType value, Node* parent) {
-    this->value = value;
-
-    this->parent = parent;
-
-    this->left = nullptr;
-    this->right = nullptr;
-}
-
-/*
-template <typename ItemType>
-Tree<ItemType>::Node::~Node() {
-    if (this != nullptr)
-        if (this->parent != nullptr)
-            if (this->parent->left != nullptr)
-                this->parent->left = nullptr;
-            else
-                this->parent->right = nullptr;
-}
-*/
-
-template <typename ItemType>
-Tree<ItemType>::Tree() {
-    this->root = nullptr;
+Tree<ItemType>::ConstIterator::ConstIterator(const typename Tree<ItemType>::ConstIterator &iterator) {
+    this->current = iterator.current;
 }
 
 template <typename ItemType>
-void Tree<ItemType>::real_delete(Tree<ItemType>::Node *leaf) {
-    if (leaf != nullptr) {
-        this->real_delete(leaf->left);
-        this->real_delete(leaf->right);
-
-        delete leaf;
-    }
+typename Tree<ItemType>::ConstIterator& Tree<ItemType>::ConstIterator::operator=(const ConstIterator &iterator) {
+    this->current = iterator.current;
 }
 
 template <typename ItemType>
-Tree<ItemType>::~Tree() {
-    this->real_delete(this->root);
-}
+void Tree<ItemType>::ConstIterator::increment() {
+    if (this->current->right != nullptr) {
+        this->current = this->current->right;
 
-template <typename ItemType>
-typename Tree<ItemType>::Node* Tree<ItemType>::real_insert(Tree<ItemType>::Node *leaf, Tree<ItemType>::Node *parent, ItemType value) {
-    if (leaf == nullptr)
-        leaf = new Node(value, parent);
-    else if (value < leaf->value)
-        leaf->left = real_insert(leaf->left, leaf, value);
-    else if (value > leaf->value)
-        leaf->right = real_insert(leaf->right, leaf, value);
-
-    return leaf;
-}
-
-template <typename ItemType>
-void Tree<ItemType>::insert(ItemType value) {
-    this->root = this->real_insert(this->root, this->root, value);
-}
-
-template <typename ItemType>
-typename Tree<ItemType>::Node* Tree<ItemType>::min(Tree<ItemType>::Node *leaf) {
-    if (leaf == nullptr)
-        return nullptr;
-    else if (leaf->left == nullptr)
-        return leaf;
-    else 
-        return min(leaf->left);
-}
-
-template <typename ItemType>
-typename Tree<ItemType>::Node* Tree<ItemType>::max(Tree<ItemType>::Node *leaf) {
-    if (leaf == nullptr)
-        return nullptr;
-    else if (leaf->right == nullptr)
-        return leaf;
-    else
-        return max(leaf->right);
-}
-
-template <typename ItemType>
-typename Tree<ItemType>::Node* Tree<ItemType>::real_erase(Tree<ItemType>::Node *leaf, ItemType value) {
-    if (leaf == nullptr)
-        return nullptr;
-    else if (value < leaf->value)
-        leaf->left = real_erase(leaf->left, value);
-    else if (value > leaf->value)
-        leaf->right = real_erase(leaf->right, value);
-    else if (leaf->left == nullptr && leaf->right == nullptr) {
-        delete leaf;
-
-        leaf = nullptr;
-    } else if (leaf->right == nullptr) {
-        auto parent = leaf->parent;
-        auto left = leaf->left;
-
-        delete leaf;
-
-        leaf = left;
-        leaf->parent = parent;
-    } else if (leaf->left == nullptr) {
-        auto parent = leaf->parent;
-        auto right = leaf->right;
-
-        delete leaf;
-
-        leaf = right;
-        leaf->parent = parent;
+        while (this->current->left != nullptr)
+            this->current = this->current->left;
     } else {
-        auto temp = max(leaf->left);
-        auto parent = temp->parent;
+        auto node = this->current->parent;
 
-        leaf->value = temp->value;
+        while (node && this->current == node->right) {
+            this->current = node;
 
-        if (parent != leaf)
-            parent->right = temp->left;
-        else
-            leaf->left = temp->left;
+            node = node->parent;
+        }
 
-        delete temp;
-        temp = nullptr;
-    }
-
-    return leaf;
-}
-
-template <typename ItemType>
-void Tree<ItemType>::erase(ItemType value) {
-    this->root = this->real_erase(this->root, value);
-}
-
-template <typename ItemType>
-typename Tree<ItemType>::Node* Tree<ItemType>::real_search(Tree<ItemType>::Node *leaf, ItemType value) {
-    if (leaf == nullptr || leaf->value == value)
-        return leaf;
-
-    if (value < leaf->value)
-        return real_search(leaf->left, value);
-
-    return real_search(leaf->right, value);
-}
-
-template <typename ItemType>
-typename Tree<ItemType>::Node* Tree<ItemType>::search(ItemType value) {
-    return this->real_search(this->root, value);
-}
-
-template <typename ItemType>
-void Tree<ItemType>::real_print(Tree<ItemType>::Node *leaf) {
-    if (leaf != nullptr) {
-        real_print(leaf->left);
-
-        std::cout << leaf->value << std::endl;
-
-        if (leaf->parent != nullptr)
-            std::cout << "PARENT -> " << leaf->parent->value << std::endl;
-        else 
-            std::cout << "ROOT" << std::endl;
-
-        std::cout << "LEFT -> ";
-
-        if (leaf->left != nullptr)
-            std::cout << leaf->left->value << std::endl;
-        else 
-            std::cout << "NOTHING" << std::endl;
-
-        std::cout << "RIGHT -> ";
-
-        if (leaf->right != nullptr)
-            std::cout << leaf->right->value << std::endl;
-        else 
-            std::cout << "NOTHING" << std::endl;
-
-        std::cout << std::endl;
-
-        real_print(leaf->right);
+        if (this->current->right != node)
+            this->current = node;
     }
 }
 
 template <typename ItemType>
-void Tree<ItemType>::print() {
-    this->real_print(root);
+typename Tree<ItemType>::ConstIterator Tree<ItemType>::ConstIterator::operator++() {
+    this->increment();
 
-    std::cout << std::endl;
+    return *this;
+}
+
+template <typename ItemType>
+typename Tree<ItemType>::ConstIterator Tree<ItemType>::ConstIterator::operator++(int) {
+    auto iterator = *this;
+
+    this->increment();
+
+    return iterator;
+}
+
+template <typename ItemType>
+void Tree<ItemType>::ConstIterator::decrement() {
+    if (this->current->parent->parent == this->current)
+        this->current = this->current->right;
+    else if (this->current->left != nullptr) {
+        auto node = this->current->left;
+
+        while (node->right != nullptr)
+            node = node->right;
+
+        this->current = node;
+    } else {
+        auto node = this->current->parent;
+
+        while (this->current == node->left) {
+            this->current = node;
+            node = node->parent;
+        }
+
+        this->current = node;
+    }
+}
+
+template <typename ItemType>
+typename Tree<ItemType>::ConstIterator Tree<ItemType>::ConstIterator::operator--() {
+    this->decrement();
+
+    return *this;
+}
+
+template <typename ItemType>
+typename Tree<ItemType>::ConstIterator Tree<ItemType>::ConstIterator::operator--(int) {
+    auto iterator = *this;
+
+    this->decrement();
+
+    return iterator;
+}
+
+template <typename ItemType>
+const typename Tree<ItemType>::Node& Tree<ItemType>::ConstIterator::operator*() const {
+    return *this->current;
+}
+
+template <typename ItemType>
+const typename Tree<ItemType>::Node* Tree<ItemType>::ConstIterator::operator->() const {
+    return this->current;
+}
+
+template <typename ItemType>
+bool Tree<ItemType>::ConstIterator::operator==(const ConstIterator& iterator) const {
+    return this->current == iterator.current;
+}
+
+template <typename ItemType>
+bool Tree<ItemType>::ConstIterator::operator!=(const ConstIterator& iterator) const {
+    return this->current != iterator.current;
+}
+
+template <typename ItemType>
+typename Tree<ItemType>::ConstIterator Tree<ItemType>::cbegin() const {
+    return Tree<ItemType>::ConstIterator(this->min(this->root));
+}
+
+template <typename ItemType>
+typename Tree<ItemType>::ConstIterator Tree<ItemType>::cend() const {
+    return Tree<ItemType>::ConstIterator(nullptr);
 }

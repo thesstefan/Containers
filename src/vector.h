@@ -1,36 +1,149 @@
+/**
+ * @file vector.h
+ *
+ * This module provides an implementation of a Vector container
+ *
+ * The implementation is following the STL vector implementation.
+ */
+
 #pragma once
 
+/**
+ * @class Vector
+ *
+ * @tparam ItemType The type of the elements the Vector contains.
+ */
 template <typename ItemType>
 class Vector {
     private:
+        /** @brief The size of the Vector */
         size_t size_;
+
+        /** @brief The capacity of the Vector */
         size_t capacity_;
 
+        /** @brief The buffer of items of the Vector */
         ItemType *buffer;
 
+        /** 
+         * @brief Reallocs memory if size_ == capacity_.
+         *
+         * @return @b true if the memory was reallocated, @b false otherwise.
+         */
         bool alloc_memory_if_needed();
 
     public:
         class Iterator {
             private:
+                /**
+                 * @brief The buffer of the Vector the Iterator works on.
+                 * 
+                 * @details The internal buffer it's initialized to @b nullptr.
+                 */
                 ItemType *buffer;
 
             public:
+                /** 
+                 * @brief Constructs the Iterator (default).
+                 *
+                 * The internal buffer is initialized with @b nullptr.
+                 */
                 Iterator();
+
+                /** 
+                 * @brief Constructs the Iterator using a @b buffer.
+                 *
+                 * The internal @b buffer is initialized with @b buffer.
+                 * 
+                 * @param buffer The buffer of the Vector on which the Iterator works on.
+                 */
                 Iterator(ItemType *buffer);
+
+                /**
+                 * @brief Copy-constructs the Iterator, 
+                 *
+                 * The internal @b buffer is initialized with the one of @b iterator.
+                 *
+                 * @param iterator The Iterator to copy-construct with.
+                 */
                 Iterator(const Iterator &iterator);
 
+                /**
+                 * @brief Replaces the internal @b buffer of the Iterator with the one of @b iterator.
+                 *
+                 * @param iterator The Iterator to get the new @b buffer from.
+                 *
+                 * @return Reference to Iterator (Iterator&).
+                 */
                 Iterator& operator=(const Iterator &iterator);
 
+                /**
+                 * @brief Pre-increments the Iterator (++it).
+                 *
+                 * The Iterator is incremented and the incremented Iterator is returned.
+                 *
+                 * @return Pre-incremented Iterator.
+                 */
                 Iterator operator++();
+
+                /**
+                 * @brief Post-increments the Iterator (it++).
+                 *
+                 * The method creates a copy of the Iterator, increments it and returns the copy of the Iterator before the increment.
+                 *
+                 * @return Post-incremented Iterator.
+                 */
                 Iterator operator++(int);
 
+
+                /**
+                 * @brief Pre-decrements the Iterator (--it).
+                 *
+                 * The Iterator is decremented and the decremented Iterator is returned.
+                 *
+                 * @return Pre-decremented Iterator.
+                 */
                 Iterator operator--();
+
+                /**
+                 * @brief Post-decrements the Iterator (it--).
+                 *
+                 * The method creates a copy of the Iterator, decrements it and returns the copy of the Iterator before the decrement.
+                 *
+                 * @return Post-decremented Iterator.
+                 */
                 Iterator operator--(int);
 
+                /**
+                 * @brief Increments the Iterator by @p x.
+                 *
+                 * The method advances the position of the internal @b of the Iterator by @b x.
+                 *
+                 * @param x The amount of iterations to be made.
+                 *
+                 * @return The incremeneted Iterator.
+                 */
                 Iterator operator+(ptrdiff_t x);
+
+                /**
+                 * @brief Increments the Iterator by @p x.
+                 *
+                 * The method advances the position of the internal @b of the Iterator by @b x.
+                 *
+                 * @param x The amount of iterations to be made.
+                 *
+                 * @return The incremeneted Iterator.
+                 */
                 Iterator operator-(ptrdiff_t x);
 
+                /**
+                 * @brief Returns the difference between the Iterator and @b iterator.
+                 *
+                 * The method uses pointer arithmetic on the internal @b buffers of the Iterators, returning the so called "distance" = number of iterations needed to be made from the Iterator to reach @b iterator.
+                 * @param iterator The Iterator to calculate the distance to.
+                 *
+                 * @return The difference between the Iterators.
+                 */
                 ptrdiff_t operator-(const Iterator &iterator) const;
 
                 Iterator operator+=(ptrdiff_t x);
@@ -95,73 +208,439 @@ class Vector {
                 int execute(IteratorType first_1, IteratorType end_1, IteratorType first_2, IteratorType end_2);
         };
 
+        /**
+         * @brief Constructs the container.
+         *
+         * @b Default @b constructor. Constructs an empty Vector.
+         *
+         * @tparam ItemType The type of the elements the Vector contains.
+         */
         Vector();
+
+        /**
+         * @brief Constructs the container with @b count copies of elements with value @b value.
+         *
+         * @tparam ItemType The type of the elements the Vector contains.
+         *
+         * @param count The number of elements to construct the Vector with.
+         *
+         * @param value The value which is assigned to the elements.
+         *
+         * @warning The behaviour is undefined if @b count is out of bounds (exceeds the limits of @b size_t)
+         */
         Vector(size_t count, ItemType &value);
+
+        /**
+         * @brief Constructs the container with @b count default-inserted instances of ItemType.
+         *
+         * @tparam ItemType The type of the elements the Vector contains.
+         *
+         * @param count The number of elements to construct the Vector with.
+         *
+         * @warning The behaviour is undefined if @b count is out of bounds (exceeds the limits of @b size_t)
+         */
         Vector(size_t count);
 
+        /** 
+         * @brief Constructs the container with the contents of range [@b first, @b last).
+         *
+         * @tparam ItemType The type of the elements the Vector contains.
+         *
+         * @tparam IteratorType The type of iterator used to define the range.
+         *
+         * @param first Iterator (of type IteratorType) to the first element of the range.
+         *
+         * @param last Iterator (of type IteratorType) to the element following the last element of the range.
+         *
+         * @warning The behaviour is undefined if the range is invalid e.g. @b first @b > @b last or @b last can't be reached from @b first.
+         *
+         * @warning The behaviour is undefined if @b last is dereferenced as the element it points to it's just a placeholder.
+         */
         template <typename IteratorType>
         Vector(IteratorType first, IteratorType last);
 
+        /**
+         * @brief Copy-constructs the container with the contents of @b other.
+         *
+         * @tparam ItemType The type of the elements the Vector contains.
+         *
+         * @param other The Vector to be used for copy-construction.
+         */
         Vector(const Vector &other);
 
+        /**
+         * @brief Destructs the container.
+         *
+         * The destructors of the elements are called and the storage used is deallocated.
+         
+         * @tparam ItemType The type of the elements the Vector contains.
+         */
         ~Vector();
 
+        /**
+         * @brief Replaces the contents of the container with the ones of @b other.
+         *
+         * @tparam ItemType The type of the elements the Vector contains.
+         *
+         * @param other The container to be copied from.
+         *
+         * @return Vector with replaced content.
+         */
         Vector& operator=(const Vector &other);
+
+        /**
+         * @brief Replaces the contents of the container with @b count copies of value @b value.
+         *
+         * @param count The number of elements to be in the final container.
+         *
+         * @param value The value which is assigned to the elements.
+         *
+         * @warning The behaviour is undefined if @b count is out of bounds (exceeds the limits of @b size_t)
+         */
         void assign(size_t count, const ItemType &value);
 
+        /**
+         * @brief Replaces the contents of the container with copies of those in the range [@b first,@b last).
+         *
+         * @tparam ItemType The type of the elements the Vector contains.
+         *
+         * @tparam IteratorType The type of iterator used to define the range.
+         *
+         * @param first Iterator (of type IteratorType) to the first element of the range.
+         *
+         * @param last Iterator (of type IteratorType) to the element following the last element of the range.
+         *
+         * @warning The behaviour is undefined if the range is invalid e.g. @b first @b > @b last or @b last can't be reached from @b first.
+         *
+         * @warning The behaviour is undefined if @b last is dereferenced as the element it points to it's just a placeholder.
+         */
         template <typename IteratorType>
         void assign(IteratorType first, IteratorType last);
 
+        /**
+         * @brief Returns a reference to the element at position @b index.
+         *
+         * No bounds checking if performed.
+         *
+         * @tparam ItemType The type of the elements the Vector contains.
+         *
+         * @param index The position of the element of which we return the reference.
+         *
+         * @return Reference (ItemType&) to the element at position @b index.
+         *
+         * @warning The behaviour is undefined if @b index is out of bounds e.g. @b index < 0 or @b index > size().
+         */
         ItemType &operator[](size_t index);
+
+        /**
+         * @brief Returns a constant reference to the element at position @b index.
+         *
+         * No bounds checking if performed.
+         *
+         * @tparam ItemType The type of the elements the Vector contains.
+         *
+         * @param index The position of the element of which we return the reference.
+         *
+         * @return Constant reference (const ItemType&) to the element at position @b index.
+         *
+         * @warning The behaviour is undefined if @b index is out of bounds e.g. @b index < 0 or @b index > size().
+         */
         const ItemType& operator[](size_t index) const;
 
+        /**
+         * @brief Returns a reference to the element at position @b index with bound checking.
+         *
+         * @tparam ItemType The type of the elements the Vector contains.
+         *
+         * @param index The position of the element of which we return the reference.
+         *
+         * @return Reference (ItemType&) to the element at position @b index.
+         *
+         * @warning If @b index is out of bounds e.g. @b index < 0 or @b index > size(), @b std::out_of_range is thrown.
+         */
         ItemType& at(size_t index);
+
+        /**
+         * @brief Returns a constant reference to the element at position @b index with bound checking.
+         *
+         * @tparam ItemType The type of the elements the Vector contains.
+         *
+         * @tparam ItemType The type of the elements the Vector contains.
+         *
+         * @param index The position of the element of which we return the reference.
+         *
+         * @return Constant reference (const ItemType&) to the element at position @b index.
+         *
+         * @warning If @b index is out of bounds e.g. @b index < 0 or @b index > size(), @b std::out_of_range is thrown.
+         */
         const ItemType& at(size_t index) const;
 
+        /**
+         * @brief Returns a reference to the first element in the container.
+         *
+         * @return Reference (ItemType&) to the first element in the container.
+         *
+         * @warning The behaviour is undefined if front() is called on an empty container.
+         */
         ItemType& front();
+
+        /**
+         * @brief Returns a constant reference to the first element in the container.
+         *
+         * @return Constant reference (const ItemType&) to the first element in the container.
+         *
+         * @warning The behaviour is undefined if front() is called on an empty container.
+         */
         const ItemType& front() const;
 
+        /**
+         * @brief Returns a reference to the last element in the container.
+         *
+         * @return Reference (ItemType&) to the last element in the container.
+         *
+         * @warning The behaviour is undefined if back() is called on an empty container.
+         */
         ItemType& back();
+
+        /**
+         * @brief Returns a const reference to the last element in the container.
+         *
+         * @return Constant reference (const ItemType&) to the last element in the container.
+         *
+         * @warning The behaviour is undefined if const() is called on an empty container.
+         */
         const ItemType& back() const;
 
+        /**
+         * @brief Checks if the container is empty.
+         *
+         * @return @b true if the container is empty, @b false otherwise.
+         */
         bool empty() const;
 
+        /**
+         * @brief Returns the number of elements in the container.
+         *
+         * @return The number of elements in the container.
+         */
         size_t size() const;
+
+        /**
+         * @brief Returns the number of elements that the container has currently allocated space for.
+         *
+         * @return The capacity of the currently allocated storage.
+         */
         size_t capacity() const;
 
+        /**
+         * @brief Returns an Iterator to the first element of the container.
+         *
+         * If the container is empty, the returned Iterator will be equal to end().
+         *
+         * @return Iterator to the first element.
+         */
         Iterator begin();
+
+        /**
+         * @brief Returns an Iterator to the element following the last element of the container.
+         *
+         * @return Iterator to the element following the last element.
+         *
+         * @warning The behaviour is undefined if end() is dereferenced, as the element it points to it's just a placeholder.
+         */
         Iterator end();
 
+        /**
+         * @brief Returns an ConstantIterator to the first element of the container.
+         *
+         * If the container is empty, the returned ConstIterator will be equal to cend().
+         *
+         * @return ConstIterator to the first element.
+         */
         ConstIterator cbegin() const;
+
+        /**
+         * @brief Returns an ConstIterator to the element following the last element of the container.
+         *
+         * @return ConstIterator to the element following the last element.
+         *
+         * @warning The behaviour is undefined if cend() is dereferenced, as the element it points to it's just a placeholder.
+         */
         ConstIterator cend() const;
 
+        /**
+         * @brief Increases the capacity of the Vector to @b capacity.
+         *
+         * If @b capacity > capacity() the new storage is allocated and the elements from the old location are moved, otherwise the method does nothing.
+         *
+         * @param capacity The new capacity of the Vector.
+         *
+         * @warning If @b capacity is out of bounds or the new allocation simply fails, @b std::bad_alloc is thrown.
+         */
         void reserve(size_t capacity);
 
-        Iterator find(const ItemType &item);
-
+        /**
+         * @brief Removes all elements from the container.
+         *
+         * Leaves the capacity() of the Vector unchanged.
+         */
         void clear();
 
+        /**
+         * @brief Inserts @b value before @b position.
+         *
+         * @param position Iterator to the element before which the element should be inserted.
+         *
+         * @param value The value of the element to be inserted.
+         *
+         * @return Iterator to the inserted value.
+         *
+         * @warning The behaviour is undefined if @b position doesn't point to a valid element of the container e.g. @b position < begin() or @b position > end().
+         */
         Iterator insert(Iterator position, const ItemType &value);
+
+        /**
+         * @brief Inserts @b count copies of @b value before @b position.
+         *
+         * @param position Iterator to the element before which the elements should be inserted.
+         *
+         * @param count The number of elements to be inserted.
+         *
+         * @param value The value of the inserted elements.
+         *
+         * @warning The behaviour is undefined if @b position doesn't point to a valid element of the container e.g. @b position < begin() or @b position > end().
+         *
+         * @warning The behaviour is undefined if @b count is out of bounds (exceeds @b size_t limits).
+         */
         void insert(Iterator position, size_t count, const ItemType& value);
 
+        /**
+         * @brief Inserts elements from range [@b first, @b last) before @b position.
+         *
+         * @tparam IteratorType The type of iterator used to define the range.
+         *
+         * @param position Iterator to the element before which the elements should be inserted.
+         *
+         * @param first Iterator (of type IteratorType) to the first element of the range.
+         *
+         * @param last Iterator (of type IteratorType) to the element following the last element of the range.
+         *
+         * @warning The behaviour is undefined if the range is invalid e.g. @b first @b > @b last or @b last can't be reached from @b first.
+         *
+         * @warning The behaviour is undefined if @b last is dereferenced as the element it points to it's just a placeholder.
+         */
         template <typename IteratorType>
         void insert(Iterator position, IteratorType first, IteratorType last);
 
+
+        /**
+         * @brief Removes the element at @b position.
+         *
+         * @param position Iterator to the element which should be removed.
+         *
+         * @return Iterator following the removed element. If the element at @position was the last, then end() is returned.
+         *
+         * @warning The behaviour is undefined if @b position is invalid e.g. @b position < begin() or @b position > end() or can't be dereferenceable => end() can't be used as @b position, because it's not dereferenceable. 
+         */
         Iterator erase(Iterator position);
+
+        /**
+         * @brief Removes the elements in the range [@b first, @b last).
+         *
+         * @param first Iterator to the first element to be removed.
+         *
+         * @param last Iterator to the element following the last element to be removed.
+         *
+         * @warning The behaviour is undefined if first and last are not valid / not pointing to the elements in the Vector.
+         */
         void erase(Iterator first, Iterator last);
 
+        /**
+         * @brief Appends @b item to the end of the container.
+         *
+         * @param item The value to be appended.
+         */
         void push_back(const ItemType &item);
+
+        /**
+         * @brief Removes the last element of the container.
+         *
+         * @warning The behaviour is undefined if pop_back() is called on a empty container.
+         */
         void pop_back();
 
+        /**
+         * @brief Exchanges the contents of the container with those of @b other.
+         *
+         * @param @other The Vector to swap contents with.
+         */
         void swap(Vector &other);
+
+        /**
+         * @brief Resizes the container to contain @b count elements with value @b value.
+         *
+         * If size() > @b count, the container is reduced to it's first @b count elements.
+         *
+         * If size() < @b count, additional elements are appended and initialized with copies of @b value. 
+         *
+         * @param count The number of elements to resize the container to.
+         *
+         * @param value The value of the elements to be appended if @b count > size()
+         */
         void resize(size_t count, const ItemType &value);
 
+        /**
+         * @brief Checks if the contents of the container and the contents of @b other are equal.
+         *
+         * @param other The container to compare with.
+         *
+         * @return @b true if the contents are equal, @b false otherwise.
+         */
         bool operator==(const Vector &other) const;
+
+        /**
+         * @brief Checks if the contents of the container and the contents of @b other are not equal.
+         *
+         * @param other The container to compare with.
+         *
+         * @return @b true if the contents are equal, @b false otherwise.
+         */
         bool operator!=(const Vector &other) const;
 
+        /**
+         * @brief Compares the contents of the container and the contents of @b other lexicographically.
+         *
+         * @param other The container to compare with.
+         *
+         * @return @b true if the contents of the container are @b lexicographically @b less than the contents of @b other, @b false otherwise.
+         */
         bool operator<(const Vector &other) const;
+
+        /**
+         * @brief Compares the contents of the container and the contents of @b other lexicographically.
+         *
+         * @param other The container to compare with.
+         *
+         * @return @b true if the contents of the container are @b lexicographically @b greater than the contents of @b other, @b false otherwise.
+         */
         bool operator>(const Vector &other) const;
+
+        /**
+         * @brief Compares the contents of the container and the contents of @b other lexicographically.
+         *
+         * @param other The container to compare with.
+         *
+         * @return @b true if the contents of the container are @b lexicographically @b greater than or @b equal the contents of @b other, @b false otherwise.
+         */
         bool operator>=(const Vector &other) const;
+
+        /**
+         * @brief Compares the contents of the container and the contents of @b other lexicographically.
+         *
+         * @param other The container to compare with.
+         *
+         * @return @b true if the contents of the container are @b lexicographically @b less than or @b equal the contents of @b other, @b false otherwise.
+         */
         bool operator<=(const Vector &other) const;
 };
 
@@ -314,6 +793,9 @@ size_t Vector<ItemType>::capacity() const {
 
 template <typename ItemType>
 void Vector<ItemType>::reserve(size_t capacity) {
+    if (capacity < this->capacity_)
+        return;
+
     ItemType *new_buffer = new ItemType[capacity];
 
     if (new_buffer == nullptr) 
@@ -341,15 +823,6 @@ bool Vector<ItemType>::alloc_memory_if_needed()  {
     }
 
     return false;
-}
-
-template <typename ItemType>
-typename Vector<ItemType>::Iterator Vector<ItemType>::find(const ItemType &item) {
-    auto it = this->begin();
-
-    for ( ; it != this->end() && *it != item; it++)
-
-    return it;
 }
 
 template <typename ItemType>
