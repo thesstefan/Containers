@@ -326,6 +326,338 @@ void assign_test() {
 }
 
 template <typename ItemType>
+void at_test() {
+    std::cout << "Vector::at(size_t index) -> ";
+
+    ItemType item(10);
+
+    Vector<ItemType> vec(size_t(10), item);
+
+    size_t index = 0;
+    for (auto it = vec.cbegin(); it != vec.cend(); it++, index++)
+        assert(vec.at(index) == *it);
+
+#ifndef MEMORY_CHECK
+    try {
+        vec.at(-1);
+    } catch (std::exception &e) {
+        const char *expected = "std::out_of_range : Vector::at(size_t, index)";
+
+        assert(*e.what() == *expected);
+    }
+
+    try {
+        vec.at(11);
+    } catch (std::exception &e) {
+        const char *expected = "std::out_of_range : Vector::at(size_t, index)";
+
+        assert(*e.what() == *expected);
+    }
+
+    Vector<ItemType> vec_;
+
+    try {
+        vec_.at(0);
+    } catch (std::exception &e) {
+        const char *expected = "std::out_of_range : Vector::at(size_t, index)";
+
+        assert(*e.what() == *expected);
+    }
+#endif
+
+    std::cout << "SUCCESS" << std::endl;
+}
+
+template <typename ItemType>
+void const_at_test() {
+    std::cout << "Vector::at(size_t index) const -> ";
+
+    ItemType item(10);
+
+    const Vector<ItemType> vec(size_t(10), item);
+
+    size_t index = 0;
+    for (auto it = vec.cbegin(); it != vec.cend(); it++, index++)
+        assert(vec.at(index) == *it);
+
+#ifndef MEMORY_CHECK
+    try {
+        vec.at(-1);
+    } catch (std::exception &e) {
+        const char *expected = "std::out_of_range : Vector::at(size_t, index) const";
+
+        assert(*e.what() == *expected);
+    }
+
+    try {
+        vec.at(10);
+    } catch (std::exception &e) {
+        const char *expected = "std::out_of_range : Vector::at(size_t, index) const";
+
+        assert(*e.what() == *expected);
+    }
+
+    Vector<ItemType> vec_;
+
+    try {
+        vec_.at(0);
+    } catch (std::exception &e) {
+        const char *expected = "std::out_of_range : Vector::at(size_t, index) const";
+
+        assert(*e.what() == *expected);
+    }
+#endif
+
+    std::cout << "SUCCESS" << std::endl;
+}
+
+template <typename ItemType>
+void at_tests() {
+    at_test<ItemType>();
+    const_at_test<ItemType>();
+}
+
+template <typename ItemType>
+void access_element_operator_test() {
+    std::cout << "Vector::operator[](size_t index) -> ";
+
+    ItemType item(10);
+
+    Vector<ItemType> vec(size_t(10), item);
+
+    assert(vec[0] == item);
+    assert(vec[9] == item);
+
+    std::cout << "SUCCESS" << std::endl;
+}
+
+template <typename ItemType>
+void const_access_element_operator_test() {
+    std::cout << "Vector::operator[](size_t index) const -> ";
+
+    ItemType item(10);
+
+    const Vector<ItemType> vec(size_t(10), item);
+
+    assert(vec[0] == item);
+    assert(vec[9] == item);
+
+    std::cout << "SUCCESS" << std::endl;
+}
+
+template <typename ItemType>
+void access_element_operator_tests() {
+    access_element_operator_test<ItemType>();
+    const_access_element_operator_test<ItemType>();
+    
+    std::cout << std::endl;
+}
+
+template <typename ItemType>
+void front_test() {
+    std::cout << "Vector::front() -> ";
+
+    ItemType item(10);
+
+    Vector<ItemType> vec(size_t(10), item);
+
+    assert(vec.front() == item);
+    assert(vec.front() == *vec.begin());
+    assert(vec.front() == vec[0]);
+    assert(vec.front() == vec.at(0));
+
+    std::cout << "SUCCESS" << std::endl;
+}
+
+template <typename ItemType>
+void const_front_test() {
+    std::cout << "Vector::front() const -> ";
+
+    ItemType item(10);
+
+    const Vector<ItemType> vec(size_t(10), item);
+
+    assert(vec.front() == item);
+    assert(vec.front() == *vec.cbegin());
+    assert(vec.front() == vec[0]);
+    assert(vec.front() == vec.at(0));
+
+    std::cout << "SUCCESS" << std::endl;
+}
+
+template <typename ItemType>
+void front_tests() {
+    front_test<ItemType>();
+    const_front_test<ItemType>();
+
+    std::cout << std::endl;
+}
+
+template <typename ItemType>
+void back_test() {
+    std::cout << "Vector::back() -> ";
+
+    ItemType item(10);
+
+    Vector<ItemType> vec(size_t(10), item);
+
+    assert(vec.back() == item);
+    assert(vec.back() == vec[9]);
+    assert(vec.back() == vec.at(9));
+
+    assert(vec.back() == *(vec.end() - 1));
+
+    std::cout << "SUCCESS" << std::endl;
+}
+
+template <typename ItemType>
+void const_back_test() {
+    std::cout << "Vector::back() const -> ";
+
+    ItemType item(10);
+
+    const Vector<ItemType> vec(size_t(10), item);
+
+    assert(vec.back() == item);
+    assert(vec.back() == vec[9]);
+    assert(vec.back() == vec.at(9));
+
+    assert(vec.back() == *(vec.cend() - 1));
+
+    std::cout << "SUCCESS" << std::endl;
+}
+
+template <typename ItemType>
+void back_tests() {
+    back_test<ItemType>();
+    const_back_test<ItemType>();
+
+    std::cout << std::endl;
+}
+
+template <typename ItemType>
+void element_access_tests() {
+    at_tests<ItemType>();
+    access_element_operator_tests<ItemType>();
+    front_tests<ItemType>();
+    back_tests<ItemType>();
+}
+
+template <typename ItemType>
+void iterator_constructor_tests<ItemType>() {
+    iterator_default_constructor_test<ItemType>();
+    iterator_buffer_constructor_test<ItemType>();
+    iterator_copy_constructor_test<ItemType>();
+}
+
+template <typename ItemType>
+void iterator_copy_assignment_operator_test() {}
+
+template <typename ItemType>
+void iterator_increment_tests() {
+    iterator_prefix_increment_test();
+    iterator_postfix_increment_test();
+    iterator_return_increment_test();
+}
+
+template <typename ItemType>
+void iterator_decrement_tests() {
+    iterator_prefix_decrement_test();
+    iterator_postfix_decrement_test();
+    iterator_return_decrement_test();
+}
+
+template <typename ItemType>
+void iterator_access_tests<ItemType>() {
+    iterator_return_pointer_operator_test();
+    iterator_return_reference_operator_test();
+    iterator_offset_dereference_operator_test();
+}
+
+template <typename ItemType>
+void iterator_substraction_test() {}
+
+template <typename ItemType>
+void iterator_compare_tests() {
+    iterator_equal_test<ItemType>;
+    iterator_not_equal_test<ItemType>;
+
+    iterator_less_test<ItemType>;
+    iterator_greater_test<ItemType>;
+
+    iterator_less_or_equal_test<ItemType>;
+    iterator_greater_or_equal_test<ItemType>;
+}
+
+template <typename ItemType>
+void iterator_test() {
+    iterator_constructor_tests<ItemType>();
+    iterator_copy_assignment_operator_test<ItemType>();
+    iterator_increment_tests<ItemType>();
+    iterator_decrement_tests<ItemType>();
+    iterator_access_tests<ItemType>();
+    iterator_substraction_test<ItemType>();
+    iterator_compare_tests<ItemType>();
+}
+
+template <typename ItemType>
+void const_iterator_constructor_tests<ItemType>() {
+    const_iterator_default_constructor_test<ItemType>();
+    const_iterator_buffer_constructor_test<ItemType>();
+    const_iterator_copy_constructor_test<ItemType>();
+}
+
+template <typename ItemType>
+void const_iterator_increment_tests() {
+    const_iterator_prefix_increment_test();
+    const_iterator_postfix_increment_test();
+    const_iterator_return_increment_test();
+}
+
+template <typename ItemType>
+void const_iterator_decrement_tests() {
+    const_iterator_prefix_decrement_test();
+    const_iterator_postfix_decrement_test();
+    const_iterator_return_decrement_test();
+}
+
+template <typename ItemType>
+void const_iterator_access_tests<ItemType>() {
+    const_iterator_return_pointer_operator_test();
+    const_iterator_return_reference_operator_test();
+    const_iterator_offset_dereference_operator_test();
+}
+
+template <typename ItemType>
+void const_iterator_compare_tests() {
+    const_iterator_equal_test<ItemType>;
+    const_iterator_not_equal_test<ItemType>;
+
+    const_iterator_less_test<ItemType>;
+    const_iterator_greater_test<ItemType>;
+
+    const_iterator_less_or_equal_test<ItemType>;
+    const_iterator_greater_or_equal_test<ItemType>;
+}
+
+template <typename ItemType>
+void const_iterator_test() {
+    const_iterator_constructor_tests<ItemType>();
+    const_iterator_copy_assignment_operator_test<ItemType>();
+    const_iterator_increment_tests<ItemType>();
+    const_iterator_decrement_tests<ItemType>();
+    const_iterator_access_tests<ItemType>();
+    const_iterator_substraction_test<ItemType>();
+    const_iterator_compare_tests<ItemType>();
+}
+
+template <typename ItemType>
+void iterator_tests() {
+    iterator_test<ItemType>;
+    const_iterator_test<ItemType>;
+}
+
+template <typename ItemType>
 void run_tests() {
     std::cout << std::endl;
 
@@ -333,10 +665,20 @@ void run_tests() {
 
     copy_assignment_operator_test<ItemType>();
 //    assign_test<ItemType>();
+    
+    element_access_tests<ItemType>();
+
+    iterator_tests<ItemType>();
 }
 
+
 int main() {
+    std::cout << "Vector<int> TESTS" << std::endl;
+
     run_tests<int>();
+
+    std::cout << "Vector<Dummy> TESTS" << std::endl;
+
     run_tests<Dummy>();
 
     return 0;
