@@ -202,7 +202,7 @@ void copy_constructor_test() {
 }
 
 template <typename ItemType>
-void run_constructor_tests() {
+void constructor_tests() {
     default_constructor_test<ItemType>();
     count_and_value_constructor_test<ItemType>();
     count_constructor_test<ItemType>();
@@ -425,8 +425,9 @@ void access_element_operator_test() {
 
     Vector<ItemType> vec(size_t(10), item);
 
-    assert(vec[0] == item);
-    assert(vec[9] == item);
+    size_t index = 0;
+    for (auto it = vec.cbegin(); it != vec.cend(); it++, index++)
+        assert(vec.at(index) == *it);
 
     std::cout << "SUCCESS" << std::endl;
 }
@@ -439,8 +440,9 @@ void const_access_element_operator_test() {
 
     const Vector<ItemType> vec(size_t(10), item);
 
-    assert(vec[0] == item);
-    assert(vec[9] == item);
+    size_t index = 0;
+    for (auto it = vec.cbegin(); it != vec.cend(); it++, index++)
+        assert(vec.at(index) == *it);
 
     std::cout << "SUCCESS" << std::endl;
 }
@@ -544,22 +546,155 @@ void element_access_tests() {
 }
 
 template <typename ItemType>
-void iterator_constructor_tests<ItemType>() {
+void iterator_default_constructor_test() {
+    std::cout << "Vector::Iterator() -> ";
+
+    typename Vector<ItemType>::Iterator it;
+
+    typename Vector<ItemType>::Iterator it_(nullptr);
+
+    assert(it == it_);
+
+    std::cout << "SUCCESS" << std::endl;
+}
+
+template <typename ItemType>
+void iterator_buffer_constructor_test() {
+    std::cout << "Vector::Iterator(ItemType *buffer) -> ";
+
+    typename Vector<ItemType>::Iterator it;
+    typename Vector<ItemType>::Iterator it_(nullptr);
+
+    assert(it == it_);
+
+    ItemType item(10);
+    size_t size = 10;
+
+    ItemType *buffer = new ItemType[size];
+
+    typename Vector<ItemType>::Iterator it__(buffer);
+    
+    for (size_t index = 0; index < size; index++)
+        *(buffer + index) = item;
+
+    typename Vector<ItemType>::Iterator it___(buffer);
+
+    assert(it__ == it___);
+
+    for (size_t index = 0; index < size; index++)
+        assert(*it___ == item);
+
+    std::cout << "SUCCESS" << std::endl;
+}
+
+template <typename ItemType>
+void iterator_copy_constructor_test() {
+    std::cout << "Vector::Iterator(const Iterator& other) -> ";
+
+    typename Vector<ItemType>::Iterator it;
+    typename Vector<ItemType>::Iterator copy(it);
+
+    assert(it == copy);
+
+    typename Vector<ItemType>::Iterator it_(nullptr);
+    typename Vector<ItemType>::Iterator copy_(it_);
+
+    assert(it_ == copy_);
+    assert(it == copy_);
+
+    std::cout << "SUCCESS" << std::endl;
+}
+
+
+template <typename ItemType>
+void iterator_constructor_tests() {
     iterator_default_constructor_test<ItemType>();
     iterator_buffer_constructor_test<ItemType>();
     iterator_copy_constructor_test<ItemType>();
 }
 
 template <typename ItemType>
-void iterator_copy_assignment_operator_test() {}
+void iterator_copy_assignment_operator_test() {
+    std::cout << "Vector::Iterator::operator=(const Iterator& other) -> ";
+
+    ItemType item(10);
+
+    Vector<ItemType> vec(size_t(20), item);
+
+    typename Vector<ItemType>::Iterator it = vec.begin();
+
+    assert(it == vec.begin());
+    assert(*it == item);
+
+    std::cout << "SUCCESS" << std::endl;
+}
+
+template <typename ItemType>
+void iterator_prefix_increment_test() {
+    std::cout << "Vector::Iterator::operator++(int) -> ";
+
+    ItemType item(10);
+    Vector<ItemType> vec(size_t(20), item);
+
+    typename Vector<ItemType>::Iterator it = vec.begin();
+
+    for ( ; it != vec.end(); ++it)
+        assert(*it == item);
+
+    it = vec.begin();
+
+    assert(++it > vec.begin());
+
+    std::cout << "SUCCESS" << std::endl;
+}
+
+template <typename ItemType>
+void iterator_postfix_increment_test() {
+    std::cout << "Vector::Iterator::operator++() -> ";
+
+    ItemType item(10);
+    Vector<ItemType> vec(size_t(20), item);
+
+    typename Vector<ItemType>::Iterator it = vec.begin();
+
+    for ( ; it != vec.end(); it++)
+        assert(*it == item);
+
+    it = vec.begin();
+
+    assert(it++ == vec.begin());
+
+    std::cout << "SUCCESS" << std::endl;
+}
+
+template <typename ItemType>
+void iterator_increment_and_assign_test() {
+    std::cout << "Vector::Iterator::operator+=(ptrdiff_t x) -> ";
+
+    ItemType item(10);
+    Vector<ItemType> vec(size_t(20), item);
+
+    typename Vector<ItemType>::Iterator it = vec.begin();
+
+    for ( ; it != vec.end(); it += 1)
+        assert(*it == item);
+
+    it = vec.begin();
+    it += vec.size();
+
+    assert(it == vec.end());
+
+    std::cout << "SUCCESS" << std::endl;
+}
 
 template <typename ItemType>
 void iterator_increment_tests() {
-    iterator_prefix_increment_test();
-    iterator_postfix_increment_test();
-    iterator_return_increment_test();
+    iterator_prefix_increment_test<ItemType>();
+    iterator_postfix_increment_test<ItemType>();
+    iterator_increment_and_assign_test<ItemType>();
 }
 
+/*
 template <typename ItemType>
 void iterator_decrement_tests() {
     iterator_prefix_decrement_test();
@@ -588,18 +723,22 @@ void iterator_compare_tests() {
     iterator_less_or_equal_test<ItemType>;
     iterator_greater_or_equal_test<ItemType>;
 }
+*/
 
 template <typename ItemType>
 void iterator_test() {
     iterator_constructor_tests<ItemType>();
     iterator_copy_assignment_operator_test<ItemType>();
     iterator_increment_tests<ItemType>();
+    /*
     iterator_decrement_tests<ItemType>();
     iterator_access_tests<ItemType>();
     iterator_substraction_test<ItemType>();
     iterator_compare_tests<ItemType>();
+*/
 }
 
+/*
 template <typename ItemType>
 void const_iterator_constructor_tests<ItemType>() {
     const_iterator_default_constructor_test<ItemType>();
@@ -650,21 +789,22 @@ void const_iterator_test() {
     const_iterator_substraction_test<ItemType>();
     const_iterator_compare_tests<ItemType>();
 }
+*/
 
 template <typename ItemType>
 void iterator_tests() {
-    iterator_test<ItemType>;
-    const_iterator_test<ItemType>;
+    iterator_test<ItemType>();
+//    const_iterator_test<ItemType>;
 }
 
 template <typename ItemType>
 void run_tests() {
     std::cout << std::endl;
 
-    run_constructor_tests<ItemType>();
+    constructor_tests<ItemType>();
 
     copy_assignment_operator_test<ItemType>();
-//    assign_test<ItemType>();
+    assign_test<ItemType>();
     
     element_access_tests<ItemType>();
 
@@ -677,9 +817,11 @@ int main() {
 
     run_tests<int>();
 
+    /*
     std::cout << "Vector<Dummy> TESTS" << std::endl;
 
     run_tests<Dummy>();
+    */
 
     return 0;
 }
