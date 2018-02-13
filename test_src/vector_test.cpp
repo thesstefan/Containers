@@ -662,7 +662,7 @@ void iterator_postfix_increment_test() {
 
     it = vec.begin();
 
-    assert(it++ == vec.begin());
+    assert(it++ == vec.begin() && it > vec.begin());
 
     std::cout << "SUCCESS" << std::endl;
 }
