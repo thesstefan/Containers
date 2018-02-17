@@ -119,6 +119,10 @@ class NormalIterator {
             this->current(Iterator());
         }
 
+        NormalIterator(const Iterator& iterator) {
+            this->current = iterator;
+        }
+
         reference operator*() const {
             return *this->current;
         }
