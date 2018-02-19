@@ -22,6 +22,14 @@ class Dummy {
         bool operator==(const Dummy &other) const {
             return this->id == other.id;
         }
+
+        bool operator>(const Dummy &other) const {
+            return this->id > other.id;
+        }
+
+        bool operator<(const Dummy &other) const {
+            return this->id < other.id;
+        }
 };
 
 std::ostream& operator<<(std::ostream& stream, const Dummy& dummy) {
@@ -1648,27 +1656,807 @@ void iterator_tests(bool is_dummy) {
 }
 
 template <typename ItemType>
+void begin_test() {
+    std::cout << "Vector::begin() -> ";
+
+    Vector<ItemType> vec;
+    auto it = vec.begin();
+
+    assert(vec.begin() == vec.end());
+    assert(vec.begin() == typename Vector<ItemType>::Iterator());
+
+    vec.push_back(10);
+    vec.push_back(20);
+    vec.push_back(30);
+    vec.push_back(40);
+
+    assert(vec.begin() != it);
+
+    it = vec.begin();
+
+    assert(vec.begin() != vec.end());
+    assert(vec.begin() != typename Vector<ItemType>::Iterator());
+
+    assert(*vec.begin() == vec[0]);
+    assert(vec.begin() == vec.end() - vec.size());
+
+    std::cout << "SUCCESS" << std::endl;
+}
+
+template <typename ItemType>
+void cbegin_test() {
+    std::cout << "Vector::cbegin() -> ";
+
+    Vector<ItemType> vec;
+    auto it = vec.cbegin();
+
+    assert(vec.cbegin() == vec.cend());
+    assert(vec.cbegin() == typename Vector<ItemType>::ConstIterator());
+
+    vec.push_back(10);
+    vec.push_back(20);
+    vec.push_back(30);
+    vec.push_back(40);
+
+    assert(vec.cbegin() != it);
+
+    it = vec.cbegin();
+
+    assert(vec.cbegin() != vec.cend());
+    assert(vec.cbegin() != typename Vector<ItemType>::ConstIterator());
+
+    assert(*vec.cbegin() == vec[0]);
+    assert(vec.cbegin() == vec.cend() - vec.size());
+
+    std::cout << "SUCCESS" << std::endl;
+}
+
+template <typename ItemType>
+void begin_tests() {
+    begin_test<ItemType>();
+    cbegin_test<ItemType>();
+}
+
+template <typename ItemType>
+void end_test() {
+    std::cout << "Vector::end() -> ";
+
+    Vector<ItemType> vec;
+    auto it = vec.end();
+
+    assert(vec.end() == vec.begin());
+    assert(vec.end() == typename Vector<ItemType>::Iterator());
+
+    vec.push_back(10);
+    vec.push_back(20);
+    vec.push_back(30);
+    vec.push_back(40);
+
+    assert(vec.end() != it);
+
+    it = vec.end();
+
+    assert(vec.end() != vec.begin());
+    assert(vec.end() != typename Vector<ItemType>::Iterator());
+
+    assert(*(--vec.end()) == vec[vec.size() - 1]);
+    assert(vec.end() == vec.begin() + vec.size());
+
+    std::cout << "SUCCESS" << std::endl;
+}
+
+template <typename ItemType>
+void cend_test() {
+    std::cout << "Vector::cend() -> ";
+
+    Vector<ItemType> vec;
+    auto it = vec.cend();
+
+    assert(vec.cend() == vec.cbegin());
+    assert(vec.cend() == typename Vector<ItemType>::ConstIterator());
+
+    vec.push_back(10);
+    vec.push_back(20);
+    vec.push_back(30);
+    vec.push_back(40);
+
+    assert(vec.cend() != it);
+
+    it = vec.cend();
+
+    assert(vec.cend() != vec.cbegin());
+    assert(vec.cend() != typename Vector<ItemType>::ConstIterator());
+
+    assert(*(--vec.cend()) == vec[vec.size() - 1]);
+    assert(vec.cend() == vec.cbegin() + vec.size());
+
+    std::cout << "SUCCESS" << std::endl;
+}
+
+template <typename ItemType>
+void end_tests() {
+    end_test<ItemType>();
+    cend_test<ItemType>();
+}
+
+template <typename ItemType>
+void iterator_limits_tests() {
+    begin_tests<ItemType>();
+
+    std::cout << std::endl;
+
+    end_tests<ItemType>();
+
+    std::cout << std::endl;
+}
+
+template <typename ItemType>
+void empty_test() {
+    std::cout << "Vector::empty() const -> ";
+
+    Vector<ItemType> vec;
+
+    assert(vec.empty() == true);
+
+    vec.push_back(10);
+    vec.push_back(20);
+    vec.push_back(30);
+    vec.push_back(40);
+
+    assert(vec.empty() == false);
+
+    vec.clear();
+
+    assert(vec.empty() == true);
+
+    vec.push_back(10);
+    vec.push_back(20);
+    vec.push_back(30);
+
+    assert(vec.empty() == false);
+
+    std::cout << "SUCCESS" << std::endl;
+}
+
+template <typename ItemType>
+void size_test() {
+    std::cout << "Vector::size() const -> ";
+
+    Vector<ItemType> vec;
+
+    assert(vec.size() == 0);
+
+    for (size_t index = 0; index < 100; index++) {
+        assert(vec.size() == index);
+
+        vec.push_back(ItemType(index));
+    }
+
+    for (size_t index = 100; index > 0; index--) {
+        assert(vec.size() == index);
+
+        vec.pop_back();
+    }
+
+    assert(vec.size() == 0);
+
+    vec.push_back(10);
+
+    assert(vec.size() == 1);
+
+    vec.clear();
+
+    assert(vec.size() == 0);
+
+    std::cout << "SUCESS" << std::endl;
+}
+
+template <typename ItemType>
+void capacity_test() {
+    std::cout << "Vector::capacity() const -> ";
+
+    Vector<ItemType> vec;
+
+    assert(vec.capacity() == 0);
+
+    size_t capacity_tracker = 0;
+
+    for (size_t index = 0; index < 100; index++) {
+        if (vec.size() == capacity_tracker)
+            if (vec.size() == 0)
+                capacity_tracker = 1;
+            else
+                capacity_tracker *= 2;
+
+        vec.push_back(ItemType(index));
+
+        assert(vec.capacity() == capacity_tracker);
+    }
+
+    assert(vec.capacity() == 128);
+
+    std::cout << "SUCCESS" << std::endl;
+}
+
+template <typename ItemType>
+void reserve_test() {
+    std::cout << "Vector::reserve(size_t capacity) -> ";
+
+    Vector<ItemType> vec;
+
+    vec.reserve(100);
+
+    assert(vec.capacity() == 100);
+
+    vec.reserve(99);
+
+    assert(vec.capacity() == 100);
+
+    vec.reserve(101);
+
+    assert(vec.capacity() == 101);
+
+#ifndef MEMORY_CHECK
+    try {
+        vec.reserve(-1);
+    } catch (std::exception &e) {
+        const char *expected = "std::bad_alloc";
+
+        assert(*e.what() == *expected);
+    }
+#endif
+
+    std::cout << "SUCCESS" << std::endl;
+}
+
+template <typename ItemType>
+void capacity_tests() {
+    empty_test<ItemType>();
+    size_test<ItemType>();
+    capacity_test<ItemType>();
+    reserve_test<ItemType>();
+}
+
+template <typename ItemType>
+void clear_test() {
+    std::cout << "Vector::clear() -> ";
+
+    Vector<ItemType> vec;
+
+    vec.push_back(10);
+    vec.push_back(20);
+    vec.push_back(30);
+    vec.push_back(40);
+    vec.push_back(50);
+
+    size_t temp_cap = vec.capacity();
+
+    vec.clear();
+
+    assert(vec.size() == 0);
+    assert(vec.capacity() == temp_cap);
+
+    assert(vec.empty() == true);
+
+    assert(vec.begin() == vec.end());
+    assert(vec.cbegin() == vec.cend());
+
+    std::cout << "SUCCES" << std::endl;
+}
+
+template <typename ItemType>
+void insert_value_test() {
+    std::cout << "Vector::insert(Iterator position, const ItemType& value) -> ";
+
+    Vector<ItemType> vec;
+
+    auto pos = vec.insert(vec.begin(), ItemType(10));
+
+    assert(*pos == ItemType(10));
+
+    assert(vec.empty() == false);
+    assert(vec.size() == 1);
+
+    pos = vec.insert(vec.end(), ItemType(20));
+
+    assert(*pos == ItemType(20));
+
+    assert(vec.empty() == false);
+    assert(vec.size() == 2);
+
+    pos = vec.insert(vec.begin(), ItemType(30));
+
+    assert(*pos == ItemType(30));
+
+    assert(vec.empty() == false);
+    assert(vec.size() == 3);
+
+    assert(vec[0] == ItemType(30) && vec[1] == ItemType(10) && vec[2] == ItemType(20));
+
+    std::cout << "SUCCESS" << std::endl;
+}
+
+template <typename ItemType>
+void insert_count_values_test() {
+    std::cout << "Vector::insert(Iterator position, size_t count, const ItemType& value) -> ";
+
+    Vector<ItemType> vec;
+
+    vec.insert(vec.begin(), size_t(10), ItemType(10));
+
+    assert(vec.empty() == false);
+    assert(vec.size() == 10);
+
+    for (auto it = vec.cbegin(); it != vec.cend(); it++)
+        assert(*it == ItemType(10));
+
+    vec.insert(vec.end(), size_t(10), ItemType(20));
+
+    assert(vec.size() == 20);
+
+    int count = 10;
+    for (auto it = vec.cend() - 1; count > 0; it--, count--)
+        assert(*it == ItemType(20));
+
+    vec.insert(vec.begin(), size_t(10), ItemType(30));
+
+    assert(vec.size() == 30);
+
+    count = 10;
+    for (auto it = vec.cbegin(); count > 0; it++, count--)
+        assert(*it == ItemType(30));
+
+    for (auto it = vec.cbegin(); it != vec.cend(); it++)
+        assert(*it == ItemType(10) || *it == ItemType(20) || *it == ItemType(30));
+
+    std::cout << "SUCCESS" << std::endl;
+}
+
+template <typename ItemType>
+void insert_range() {
+    std::cout << "Vector::insert(Iterator position, IteratorType first, IteratorType last) -> ";
+
+    std::vector<ItemType> vector;
+
+    vector.push_back(ItemType(10));
+    vector.push_back(ItemType(20));
+    vector.push_back(ItemType(30));
+
+    Vector<ItemType> vec;
+
+    vec.insert(vec.begin(), vector.begin(), vector.end());
+
+    assert(vec.size() == vector.size());
+    assert(vec.empty() == false);
+
+    for (auto it = vector.cbegin(), it_ = vec.cbegin(); it != vector.cend(), it_ != vec.cend(); it++, it_++)
+        assert(*it == *it_);
+
+    vec.insert(vec.end(), vector.begin(), vector.end());
+
+    assert(vec.size() == vector.size() * 2);
+
+    for (size_t index = 0; index < 6; index += 3) 
+        assert(vec[index] == ItemType(10) && vec[index + 1] == ItemType(20) && vec[index + 2] == ItemType(30));
+
+    vec.insert(vec.begin(), vector.begin(), vector.end());
+
+    for (size_t index = 0; index < 9; index += 3) 
+        assert(vec[index] == ItemType(10) && vec[index + 1] == ItemType(20) && vec[index + 2] == ItemType(30));
+
+    assert(vec.size() == vector.size() * 3);
+
+    std::cout << "SUCCESS" << std::endl;
+}
+
+template <typename ItemType>
+void insert_tests() {
+    insert_value_test<ItemType>();
+    insert_count_values_test<ItemType>();
+    insert_range<ItemType>();
+    
+    std::cout << std::endl;
+}
+
+template <typename ItemType>
+void erase_test() {
+    std::cout << "Vector::erase(Iterator position) -> ";
+
+    Vector<ItemType> vec;
+
+    vec.push_back(ItemType(10));
+
+    auto pos = vec.erase(vec.begin());
+
+    assert(vec.size() == 0);
+    assert(pos == vec.end());
+
+    vec.push_back(ItemType(10));
+    vec.push_back(ItemType(20));
+    vec.push_back(ItemType(30));
+
+    pos = vec.erase(vec.begin() + 1);
+
+    assert(*pos == ItemType(30));
+    assert(vec.size() == 2);
+
+    assert(vec[0] == ItemType(10) && vec[1] == ItemType(30));
+
+    std::cout << "SUCCESS" << std::endl;
+}
+
+template <typename ItemType>
+void erase_range() {
+    std::cout << "Vector::erase(Iterator first, Iterator last) -> ";
+
+    Vector<ItemType> vec;
+
+    vec.push_back(ItemType(10));
+    vec.push_back(ItemType(20));
+    vec.push_back(ItemType(30));
+
+    vec.erase(vec.begin(), vec.end());
+
+    assert(vec.empty() == true);
+    assert(vec.size() == 0);
+
+    vec.push_back(ItemType(10));
+    vec.push_back(ItemType(20));
+    vec.push_back(ItemType(30));
+
+    vec.erase(vec.begin(), vec.begin() + 1);
+
+    assert(vec.size() == 2);
+    assert(vec[0] == ItemType(20) && vec[1] == ItemType(30));
+
+    vec.erase(vec.begin(), vec.end());
+
+    assert(vec.empty() == true);
+    assert(vec.size() == 0);
+
+    vec.push_back(ItemType(10));
+    vec.push_back(ItemType(20));
+    vec.push_back(ItemType(30));
+    vec.push_back(ItemType(40));
+
+    vec.erase(vec.begin() + 1, vec.end() - 1);
+
+    assert(vec.size() == 2);
+    assert(vec[0] == ItemType(10) && vec[1] == ItemType(40));
+
+    std::cout << "SUCCESS" << std::endl;
+}
+
+template <typename ItemType>
+void erase_tests() {
+    erase_test<ItemType>();
+    erase_range<ItemType>();
+
+    std::cout << std::endl;
+}
+
+template <typename ItemType>
+void push_back_test() {
+    std::cout << "Vector::push_back(ItemType &value) -> ";
+
+    Vector<ItemType> vec;
+
+    vec.push_back(ItemType(10));
+
+    assert(vec.size() == 1);
+    assert(vec.empty() == false);
+
+    assert(*vec.begin() == ItemType(10));
+
+    vec.clear();
+
+    for (size_t index = 0; index < 100; index++) {
+        vec.push_back(ItemType(index));
+
+        assert(vec[index] == index);
+        assert(vec.size() == index + 1);
+    }
+
+    assert(vec.size() == 100);
+    assert(vec.capacity() > 100);
+
+    std::cout << "SUCCESS" << std::endl;
+}
+
+template <typename ItemType>
+void pop_back_test() {
+    std::cout << "Vector::pop_back() -> ";
+
+    Vector<ItemType> vec;
+
+    vec.push_back(ItemType(10));
+
+    vec.pop_back();
+
+    assert(vec.empty() == true);
+    assert(vec.size() == 0);
+
+    for (size_t index = 0; index < 100; index++)
+        vec.push_back(ItemType(index));
+
+    size_t count = 100;
+    while (count--) {
+        vec.pop_back();
+
+        assert(vec.size() == count);
+    }
+
+    std::cout << "SUCCESS" << std::endl;
+}
+
+template <typename ItemType>
+void resize_test() {
+    std::cout << "Vector::resize(size_t count, const ItemType& value) -> ";
+
+    Vector<ItemType> vec;
+
+    vec.resize(100, ItemType(10));
+
+    assert(vec.size() == 100);
+    assert(vec.capacity() > 100);
+
+    for (auto it = vec.cbegin(); it != vec.cend(); it++)
+        assert(*it == ItemType(10));
+
+    vec.resize(10, ItemType(10));
+
+    assert(vec.size() == 10);
+
+    for (auto it = vec.cbegin(); it != vec.cend(); it++)
+        assert(*it == ItemType(10));
+
+    std::cout << "SUCCESS" << std::endl;
+}
+
+template <typename ItemType>
+void swap_test() {
+    std::cout << "Vector::swap(const Vector& other) -> ";
+
+    Vector<ItemType> vec;
+    
+    vec.push_back(ItemType(10));
+    vec.push_back(ItemType(20));
+    vec.push_back(ItemType(30));
+
+    Vector<ItemType> vec_;
+
+    vec_.push_back(ItemType(100));
+    vec_.push_back(ItemType(200));
+
+    vec.swap(vec_);
+
+    assert(vec.size() == 2 && vec_.size() == 3);
+
+    assert(vec[0] == ItemType(100) && vec[1] == ItemType(200));
+    assert(vec_[0] == ItemType(10) && vec_[1] == ItemType(20) && vec_[2] == ItemType(30));
+
+    std::cout << "SUCCESS" << std::endl;
+}
+
+template <typename ItemType>
+void modifiers_tests() {
+    clear_test<ItemType>();
+
+    insert_tests<ItemType>();
+    erase_tests<ItemType>();
+
+    push_back_test<ItemType>();
+    pop_back_test<ItemType>();
+
+    std::cout << std::endl;
+    
+    resize_test<ItemType>();
+    swap_test<ItemType>();
+    
+    std::cout << std::endl;
+}
+
+template <typename ItemType>
+void equal_test() {
+    std::cout << "Vector::operator==(const Vector& other) -> ";
+
+    Vector<ItemType> vec;
+    Vector<ItemType> vec_;
+
+    assert(vec == vec_);
+
+    vec.push_back(10);
+    vec_.push_back(10);
+
+    assert(vec == vec_);
+
+    vec.erase(vec.begin());
+    vec_.erase(vec_.begin());
+
+    assert(vec == vec_);
+
+    std::cout << "SUCCESS" << std::endl;
+}
+
+template <typename ItemType>
+void not_equal_test() {
+    std::cout << "Vector::operator!=(const Vector& other) -> ";
+
+    Vector<ItemType> vec;
+    Vector<ItemType> vec_;
+
+    assert(!(vec != vec_));
+
+    vec.push_back(10);
+    vec_.push_back(10);
+
+    assert(!(vec != vec_));
+
+    vec.erase(vec.begin());
+    vec_.erase(vec_.begin());
+
+    assert(!(vec != vec_));
+
+    std::cout << "SUCCESS" << std::endl;
+}
+
+template <typename ItemType>
+void less_test() {
+    std::cout << "Vector::operator<(const Vector& other) -> ";
+
+    Vector<ItemType> vec;
+    Vector<ItemType> vec_;
+
+    assert(!(vec < vec_) && !(vec_ < vec));
+
+    vec.push_back(10);
+    vec_.push_back(20);
+
+    assert(vec < vec_);
+
+    vec.erase(vec.begin());
+    vec.push_back(100);
+
+    assert(vec_ < vec);
+
+    vec.clear();
+
+    assert(vec < vec_);
+
+    std::cout << "SUCCESS" << std::endl;
+}
+
+template <typename ItemType>
+void greater_test() {
+    std::cout << "Vector::operator>(const Vector& other) -> ";
+
+    Vector<ItemType> vec;
+    Vector<ItemType> vec_;
+
+    assert(!(vec > vec_) && !(vec_ > vec));
+
+    vec.push_back(10);
+    vec_.push_back(20);
+
+    assert(vec_ > vec);
+
+    vec.erase(vec.begin());
+    vec.push_back(100);
+
+    assert(vec > vec_);
+
+    vec.clear();
+
+    assert(vec_ > vec);
+
+    std::cout << "SUCCESS" << std::endl;
+}
+
+template <typename ItemType>
+void less_or_equal_test() {
+    std::cout << "Vector::operator<=(const Vector& other) -> ";
+
+    Vector<ItemType> vec;
+    Vector<ItemType> vec_;
+
+    assert(vec <= vec_ && vec_ <= vec);
+
+    vec.push_back(10);
+    vec_.push_back(20);
+
+    assert(vec <= vec_);
+
+    vec.erase(vec.begin());
+    vec.push_back(100);
+
+    assert(vec_ <= vec);
+
+    vec.clear();
+
+    assert(vec <= vec_);
+
+    vec_.clear();
+
+    assert(vec <= vec_);
+
+    std::cout << "SUCCESS" << std::endl;
+}
+
+template <typename ItemType>
+void greater_or_equal_test() {
+    std::cout << "Vector::operator>=(const Vector& other) -> ";
+
+    Vector<ItemType> vec;
+    Vector<ItemType> vec_;
+
+    assert(vec >= vec_ && vec_ >= vec);
+
+    vec.push_back(10);
+    vec_.push_back(20);
+
+    assert(vec_ >= vec);
+
+    vec.erase(vec.begin());
+    vec.push_back(100);
+
+    assert(vec >= vec_);
+
+    vec.clear();
+
+    assert(vec_ >= vec);
+
+    vec_.clear();
+
+    assert(vec >= vec_);
+
+    std::cout << "SUCCESS" << std::endl;
+}
+
+template <typename ItemType>
+void compare_tests() {
+    equal_test<ItemType>();
+    not_equal_test<ItemType>();
+
+    std::cout << std::endl;
+
+    less_test<ItemType>();
+    greater_test<ItemType>();
+
+    std::cout << std::endl;
+
+    less_or_equal_test<ItemType>();
+    greater_or_equal_test<ItemType>();
+}
+
+template <typename ItemType>
 void run_test(bool is_dummy) {
     std::cout << std::endl;
 
     constructor_tests<ItemType>();
 
     copy_assignment_operator_test<ItemType>();
+
     assign_test<ItemType>();
     
     element_access_tests<ItemType>();
 
     iterator_tests<ItemType>(is_dummy);
+
+    iterator_limits_tests<ItemType>();
+
+    capacity_tests<ItemType>();
+
+    modifiers_tests<ItemType>();
+
+    compare_tests<ItemType>();
 }
 
 void run_tests() {
     run_test<Dummy>(true);
 
-    /*
     run_test<int>(false);
     run_test<char>(false);
     run_test<double>(false);
-    */
 }
 
 int main() {

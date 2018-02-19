@@ -16,20 +16,11 @@
 template <typename ItemType>
 class Vector {
     private:
-        /** @brief The size of the Vector */
         size_t size_;
-
-        /** @brief The capacity of the Vector */
         size_t capacity_;
 
-        /** @brief The buffer of items of the Vector */
         ItemType *buffer;
 
-        /** 
-         * @brief Reallocs memory if size_ == capacity_.
-         *
-         * @return @b true if the memory was reallocated, @b false otherwise.
-         */
         bool alloc_memory_if_needed();
 
     public:
@@ -937,7 +928,7 @@ bool Vector<ItemType>::operator==(const Vector &other) const {
         return false;
 
     for (auto it = this->cbegin(), other_it = other.cbegin(); it != this->cend() && other_it != this->cend(); it++, other_it++)
-       if (*it != *other_it)
+       if (!(*it == *other_it))
           return false;
 
    return true;
@@ -958,8 +949,6 @@ int Vector<ItemType>::Compare::execute(IteratorType first_1, IteratorType end_1,
     auto it_2 = first_2;
 
     for ( ; it_1 != end_1 && it_2 != end_2; it_1++, it_2++) {
-        std::cout << *it_1 << " " << *it_2 << std::endl;
-
         if (*it_1 < *it_2)
             return -1;
         else if (*it_1 > *it_2)
