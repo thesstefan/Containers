@@ -2462,19 +2462,19 @@ void run_tests() {
 
     run_test<int>(false);
 
-    std::cout << "DUMMY TESTS PASSED" << std::endl;
+    std::cout << "INT TESTS PASSED" << std::endl;
 
     run_test<char>(false);
 
-    std::cout << "DUMMY TESTS PASSED" << std::endl;
+    std::cout << "CHAR TESTS PASSED" << std::endl;
 
     run_test<double>(false);
 
-    std::cout << "DUMMY TESTS PASSED" << std::endl;
+    std::cout << "DOUBLE TESTS PASSED" << std::endl;
 
     run_test<float>(false);
 
-    std::cout << "DUMMY TESTS PASSED" << std::endl;
+    std::cout << "FLOAT TESTS PASSED" << std::endl;
 
     std::cout << std::endl;
 }
