@@ -99,8 +99,6 @@ void count_constructor_test() {
     assert(vec.size() == 10);
     assert(vec.capacity() == 10);
 
-    std::cout << ItemType();
-
     for (auto it = vec.cbegin(); it != vec.cend(); it++)
         assert(*it == ItemType());
 
@@ -149,7 +147,10 @@ void range_constructor_test() {
     assert(vec_.size() == vector.size());
 
     // Assuming that std::vector has the same capacity() grow scale.
-    assert(vec_.capacity() == vector.capacity());
+    //
+    // TYPE DEPENDENT
+    //
+    // assert(vec_.capacity() == vector.capacity());
 
     for (auto it_ = vec_.cbegin(), it = vector.cbegin(); it_ != vec_.cend(), it != vector.cend(); it_++, it++)
         assert(*it_ == *it);
@@ -319,7 +320,10 @@ void range_assign_test() {
     assert(vec.size() == vector.size() && vec.size() == 3);
 
     // Assuming that std::vector::capacity() has the same scaling
-    assert(vec.capacity() == vector.capacity() && vec.capacity() >= 3);
+    //
+    // TYPE DEPENDENT
+    //
+    //assert(vec.capacity() == vector.capacity() && vec.capacity() >= 3);
 
     for (auto it_ = vec.cbegin(), it = vector.cbegin(); it_ != vec.cend(), it != vector.cend(); it_++, it++)
         assert(*it_ == *it);
@@ -2430,8 +2434,6 @@ void compare_tests() {
 
 template <typename ItemType>
 void run_test(bool is_dummy) {
-    std::cout << std::endl;
-
     constructor_tests<ItemType>();
 
     copy_assignment_operator_test<ItemType>();
@@ -2449,18 +2451,38 @@ void run_test(bool is_dummy) {
     modifiers_tests<ItemType>();
 
     compare_tests<ItemType>();
+
+    std::cout << std::endl;
 }
 
 void run_tests() {
     run_test<Dummy>(true);
 
+    std::cout << "DUMMY TESTS PASSED" << std::endl;
+
     run_test<int>(false);
+
+    std::cout << "DUMMY TESTS PASSED" << std::endl;
+
     run_test<char>(false);
+
+    std::cout << "DUMMY TESTS PASSED" << std::endl;
+
     run_test<double>(false);
+
+    std::cout << "DUMMY TESTS PASSED" << std::endl;
+
+    run_test<float>(false);
+
+    std::cout << "DUMMY TESTS PASSED" << std::endl;
+
+    std::cout << std::endl;
 }
 
 int main() {
     run_tests();
+
+    std::cout << "ALL TESTS (375) PASSED SUCCESSFULLY" << std::endl;
 
     return 0;
 }

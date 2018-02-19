@@ -1,6 +1,34 @@
 #pragma once
 
 template <typename ItemType>
+class VectorCompare {
+    public:
+        template <typename IteratorType>
+        int execute(IteratorType first_1, IteratorType last_1, IteratorType first_2, IteratorType last_2) const;
+};
+
+template <typename ItemType>
+template <typename IteratorType>
+int VectorCompare<ItemType>::execute(IteratorType first_1, IteratorType end_1, IteratorType first_2, IteratorType end_2) const {
+    auto it_1 = first_1;
+    auto it_2 = first_2;
+
+    for ( ; it_1 != end_1 && it_2 != end_2; it_1++, it_2++) {
+        if (*it_1 < *it_2)
+            return -1;
+        else if (*it_1 > *it_2)
+            return 1;
+    }
+
+    if (it_1 == end_1 && it_2 != end_2)
+        return -1;
+    else if (it_1 != end_1 && it_2 == end_2)
+        return 1;
+
+    return 0;
+}
+
+template <typename ItemType>
 class NodeCompare {
     public:
         template <typename IteratorType>

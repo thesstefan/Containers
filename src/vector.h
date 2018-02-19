@@ -8,12 +8,13 @@
 
 #pragma once
 
+#include "misc.h"
 /**
  * @class Vector
  *
  * @tparam ItemType The type of the elements the Vector contains.
  */
-template <typename ItemType>
+template <typename ItemType, typename Compare = VectorCompare<ItemType>>
 class Vector {
     private:
         size_t size_;
@@ -191,12 +192,6 @@ class Vector {
                 bool operator>(const ConstIterator &iterator) const;
                 bool operator<=(const ConstIterator &iterator) const;
                 bool operator>=(const ConstIterator &iterator) const;
-        };
-
-        class Compare {
-            public:
-                template <typename IteratorType>
-                int execute(IteratorType first_1, IteratorType end_1, IteratorType first_2, IteratorType end_2);
         };
 
         /**
@@ -635,15 +630,15 @@ class Vector {
         bool operator<=(const Vector &other) const;
 };
 
-template <typename ItemType>
-Vector<ItemType>::Vector() {
+template <typename ItemType, typename Compare>
+Vector<ItemType, Compare>::Vector() {
     this->capacity_ = 0;
     this->size_ = 0;
     this->buffer = nullptr;
 }
 
-template <typename ItemType>
-Vector<ItemType>::Vector(size_t count, ItemType& value) {
+template <typename ItemType, typename Compare>
+Vector<ItemType, Compare>::Vector(size_t count, ItemType& value) {
     this->capacity_ = count;
     this->size_ = count;
 
@@ -653,8 +648,8 @@ Vector<ItemType>::Vector(size_t count, ItemType& value) {
         *it = value;
 }
 
-template <typename ItemType>
-Vector<ItemType>::Vector(size_t count) {
+template <typename ItemType, typename Compare>
+Vector<ItemType, Compare>::Vector(size_t count) {
     this->capacity_ = count;
     this->size_ = count;
 
@@ -664,9 +659,9 @@ Vector<ItemType>::Vector(size_t count) {
         *it = ItemType();
 }
 
-template <typename ItemType> 
+template <typename ItemType, typename Compare> 
 template <typename IteratorType> 
-Vector<ItemType>::Vector(IteratorType first, IteratorType last) {
+Vector<ItemType, Compare>::Vector(IteratorType first, IteratorType last) {
     ptrdiff_t count = last - first;
 
     this->size_ = count;
@@ -678,8 +673,8 @@ Vector<ItemType>::Vector(IteratorType first, IteratorType last) {
         *it = *it_;
 }
 
-template <typename ItemType>
-Vector<ItemType>::Vector(const Vector<ItemType> &other) {
+template <typename ItemType, typename Compare>
+Vector<ItemType, Compare>::Vector(const Vector<ItemType, Compare> &other) {
     this->size_ = other.size_;
     this->capacity_ = other.capacity_;
 
@@ -689,13 +684,13 @@ Vector<ItemType>::Vector(const Vector<ItemType> &other) {
         *it = *it_;
 }
 
-template <typename ItemType>
-Vector<ItemType>::~Vector() {
+template <typename ItemType, typename Compare>
+Vector<ItemType, Compare>::~Vector() {
     delete[] this->buffer;
 }
 
-template <typename ItemType>
-Vector<ItemType>& Vector<ItemType>::operator=(const Vector<ItemType> &other) {
+template <typename ItemType, typename Compare>
+Vector<ItemType, Compare>& Vector<ItemType, Compare>::operator=(const Vector<ItemType, Compare> &other) {
     delete[] this->buffer;
 
     this->size_ = other.size_;
@@ -707,86 +702,86 @@ Vector<ItemType>& Vector<ItemType>::operator=(const Vector<ItemType> &other) {
         *it = *it_;
 }
 
-template <typename ItemType>
-void Vector<ItemType>::assign(size_t count, const ItemType& value) {
+template <typename ItemType, typename Compare>
+void Vector<ItemType, Compare>::assign(size_t count, const ItemType& value) {
     this->clear();
 
     while (this->size_ < count)
         this->push_back(value);
 }
 
-template <typename ItemType>
+template <typename ItemType, typename Compare>
 template <typename IteratorType>
-void Vector<ItemType>::assign(IteratorType first, IteratorType last) {
+void Vector<ItemType, Compare>::assign(IteratorType first, IteratorType last) {
     this->clear();
 
     for (auto it = first; it != last; it++)
         this->push_back(*it);
 }
 
-template <typename ItemType>
-ItemType& Vector<ItemType>::at(size_t index) {
+template <typename ItemType, typename Compare>
+ItemType& Vector<ItemType, Compare>::at(size_t index) {
     if (index < 0 || index >= this->size_)
         throw std::out_of_range("std::out_of_range : Vector::at(size_t index)");
 
     return this->buffer[index];
 }
 
-template <typename ItemType>
-const ItemType& Vector<ItemType>::at(size_t index) const {
+template <typename ItemType, typename Compare>
+const ItemType& Vector<ItemType, Compare>::at(size_t index) const {
     if (index < 0 || index >= this->size_)
         throw std::out_of_range("std::out_of_range : Vector::at(size_t index) const");
 
     return this->buffer[index];
 }
 
-template <typename ItemType>
-ItemType& Vector<ItemType>::operator[](size_t index) {
+template <typename ItemType, typename Compare>
+ItemType& Vector<ItemType, Compare>::operator[](size_t index) {
     return this->buffer[index];
 }
 
-template <typename ItemType>
-const ItemType& Vector<ItemType>::operator[](size_t index) const {
+template <typename ItemType, typename Compare>
+const ItemType& Vector<ItemType, Compare>::operator[](size_t index) const {
     return this->buffer[index];
 }
 
-template <typename ItemType>
-ItemType& Vector<ItemType>::front() {
+template <typename ItemType, typename Compare>
+ItemType& Vector<ItemType, Compare>::front() {
     return *this->begin();
 }
 
-template <typename ItemType>
-const ItemType& Vector<ItemType>::front() const {
+template <typename ItemType, typename Compare>
+const ItemType& Vector<ItemType, Compare>::front() const {
     return *this->cbegin();
 }
 
-template <typename ItemType>
-ItemType& Vector<ItemType>::back() {
+template <typename ItemType, typename Compare>
+ItemType& Vector<ItemType, Compare>::back() {
     return *(this->end() - 1);
 }
 
-template <typename ItemType>
-const ItemType& Vector<ItemType>::back() const {
+template <typename ItemType, typename Compare>
+const ItemType& Vector<ItemType, Compare>::back() const {
     return *(this->cend() - 1);
 }
 
-template <typename ItemType>
-bool Vector<ItemType>::empty() const {
+template <typename ItemType, typename Compare>
+bool Vector<ItemType, Compare>::empty() const {
     return this->cbegin() == this->cend();
 }
 
-template <typename ItemType>
-size_t Vector<ItemType>::size() const {
+template <typename ItemType, typename Compare>
+size_t Vector<ItemType, Compare>::size() const {
     return this->size_;
 }
 
-template <typename ItemType>
-size_t Vector<ItemType>::capacity() const {
+template <typename ItemType, typename Compare>
+size_t Vector<ItemType, Compare>::capacity() const {
     return this->capacity_;
 }
 
-template <typename ItemType>
-void Vector<ItemType>::reserve(size_t capacity) {
+template <typename ItemType, typename Compare>
+void Vector<ItemType, Compare>::reserve(size_t capacity) {
     if (capacity < this->capacity_)
         return;
 
@@ -805,8 +800,8 @@ void Vector<ItemType>::reserve(size_t capacity) {
 }
 
 
-template <typename ItemType>
-bool Vector<ItemType>::alloc_memory_if_needed()  {
+template <typename ItemType, typename Compare>
+bool Vector<ItemType, Compare>::alloc_memory_if_needed()  {
     if (this->size_ == this->capacity_) {
         if (this->capacity_ == 0)
             this->reserve(1);
@@ -819,16 +814,16 @@ bool Vector<ItemType>::alloc_memory_if_needed()  {
     return false;
 }
 
-template <typename ItemType>
-void Vector<ItemType>::clear() {
+template <typename ItemType, typename Compare>
+void Vector<ItemType, Compare>::clear() {
     delete[] this->buffer;
     this->size_ = 0;
 
     this->buffer = new ItemType[this->capacity_];
 }
 
-template <typename ItemType>
-typename Vector<ItemType>::Iterator Vector<ItemType>::insert(typename Vector<ItemType>::Iterator position, const ItemType& value) {
+template <typename ItemType, typename Compare>
+typename Vector<ItemType, Compare>::Iterator Vector<ItemType, Compare>::insert(typename Vector<ItemType, Compare>::Iterator position, const ItemType& value) {
     ptrdiff_t relative_position = position - this->begin();
 
     if (this->alloc_memory_if_needed() == true)
@@ -845,21 +840,21 @@ typename Vector<ItemType>::Iterator Vector<ItemType>::insert(typename Vector<Ite
     return position;
 }
 
-template <typename ItemType>
-void Vector<ItemType>::insert(typename Vector<ItemType>::Iterator position, size_t count, const ItemType& value) {
+template <typename ItemType, typename Compare>
+void Vector<ItemType, Compare>::insert(typename Vector<ItemType, Compare>::Iterator position, size_t count, const ItemType& value) {
     while (count--)
         position = this->insert(position, value);
 }
 
-template <typename ItemType>
+template <typename ItemType, typename Compare>
 template <typename IteratorType>
-void Vector<ItemType>::insert(typename Vector<ItemType>::Iterator position, IteratorType first, IteratorType last) {
+void Vector<ItemType, Compare>::insert(typename Vector<ItemType, Compare>::Iterator position, IteratorType first, IteratorType last) {
     for (auto it = last - 1; it >= first; it--)
         position = this->insert(position, *it);
 }
 
-template <typename ItemType>
-typename Vector<ItemType>::Iterator Vector<ItemType>::erase(typename Vector<ItemType>::Iterator position) {
+template <typename ItemType, typename Compare>
+typename Vector<ItemType, Compare>::Iterator Vector<ItemType, Compare>::erase(typename Vector<ItemType, Compare>::Iterator position) {
     ptrdiff_t relative_position = position - this->begin();
 
     for (auto it = position; it < this->end() - 1; it++)
@@ -873,23 +868,23 @@ typename Vector<ItemType>::Iterator Vector<ItemType>::erase(typename Vector<Item
     return position;
 }
 
-template <typename ItemType>
-void Vector<ItemType>::erase(typename Vector<ItemType>::Iterator first, typename Vector<ItemType>::Iterator last) {
+template <typename ItemType, typename Compare>
+void Vector<ItemType, Compare>::erase(typename Vector<ItemType, Compare>::Iterator first, typename Vector<ItemType, Compare>::Iterator last) {
     auto position = first;
 
     for (auto it = first; it < last; it++)
         position = this->erase(position);
 }
 
-template <typename ItemType>
-void Vector<ItemType>::push_back(const ItemType &item) {
+template <typename ItemType, typename Compare>
+void Vector<ItemType, Compare>::push_back(const ItemType &item) {
     this->alloc_memory_if_needed();
 
     this->buffer[this->size_++] = item;
 }
 
-template <typename ItemType>
-void Vector<ItemType>::pop_back() {
+template <typename ItemType, typename Compare>
+void Vector<ItemType, Compare>::pop_back() {
     this->alloc_memory_if_needed();
 
     if (this->size_ != 0)
@@ -905,15 +900,15 @@ void swap_(ItemType &item_1, ItemType &item_2) {
     item_2 = temp;
 }
 
-template <typename ItemType>
-void Vector<ItemType>::swap(Vector<ItemType> &other) {
+template <typename ItemType, typename Compare>
+void Vector<ItemType, Compare>::swap(Vector<ItemType, Compare> &other) {
     swap_(this->buffer, other.buffer);
     swap_(this->size_, other.size_);
     swap_(this->capacity_, other.capacity_);
 }
 
-template <typename ItemType>
-void Vector<ItemType>::resize(size_t count, const ItemType &value) {
+template <typename ItemType, typename Compare>
+void Vector<ItemType, Compare>::resize(size_t count, const ItemType &value) {
     while (count != this->size_) {
         if (count > this->size_) 
             this->push_back(value);
@@ -922,8 +917,8 @@ void Vector<ItemType>::resize(size_t count, const ItemType &value) {
     }
 }
 
-template <typename ItemType>
-bool Vector<ItemType>::operator==(const Vector &other) const {
+template <typename ItemType, typename Compare>
+bool Vector<ItemType, Compare>::operator==(const Vector &other) const {
     if (this->size_ != other.size_)
         return false;
 
@@ -934,99 +929,78 @@ bool Vector<ItemType>::operator==(const Vector &other) const {
    return true;
 } 
 
-template <typename ItemType>
-bool Vector<ItemType>::operator!=(const Vector &other) const {
+template <typename ItemType, typename Compare>
+bool Vector<ItemType, Compare>::operator!=(const Vector &other) const {
     if (*this == other)
         return false;
 
     return true;
 }
 
-template <typename ItemType>
-template <typename IteratorType>
-int Vector<ItemType>::Compare::execute(IteratorType first_1, IteratorType end_1, IteratorType first_2, IteratorType end_2) {
-    auto it_1 = first_1;
-    auto it_2 = first_2;
-
-    for ( ; it_1 != end_1 && it_2 != end_2; it_1++, it_2++) {
-        if (*it_1 < *it_2)
-            return -1;
-        else if (*it_1 > *it_2)
-            return 1;
-    }
-
-    if (it_1 == end_1 && it_2 != end_2)
-        return -1;
-    else if (it_1 != end_1 && it_2 == end_2)
-        return 1;
-
-    return 0;
-}
-
-template <typename ItemType>
-bool Vector<ItemType>::operator<(const Vector &other) const {
+template <typename ItemType, typename Compare>
+bool Vector<ItemType, Compare>::operator<(const Vector &other) const {
     if (Compare().execute(this->cbegin(), this->cend(), other.cbegin(), other.cend()) < 0)
         return true;
 
     return false;
 }
 
-template <typename ItemType>
-bool Vector<ItemType>::operator>(const Vector &other) const {
+template <typename ItemType, typename Compare>
+bool Vector<ItemType, Compare>::operator>(const Vector &other) const {
     if (Compare().execute(this->cbegin(), this->cend(), other.cbegin(), other.cend()) > 0)
         return true;
 
     return false;
 }
 
-template <typename ItemType>
-bool Vector<ItemType>::operator<=(const Vector &other) const {
+template <typename ItemType, typename Compare>
+bool Vector<ItemType, Compare>::operator<=(const Vector &other) const {
     if (Compare().execute(this->cbegin(), this->cend(), other.cbegin(), other.cend()) <= 0)
         return true;
 
     return false;
 }
 
-template <typename ItemType>
-bool Vector<ItemType>::operator>=(const Vector &other) const {
+template <typename ItemType, typename Compare>
+bool Vector<ItemType, Compare>::operator>=(const Vector &other) const {
     if (Compare().execute(this->cbegin(), this->cend(), other.cbegin(), other.cend()) >= 0)
         return true;
 
     return false;
 }
 
-template <typename ItemType>
-Vector<ItemType>::Iterator::Iterator() {
+template <typename ItemType, typename Compare>
+Vector<ItemType, Compare>::Iterator::Iterator() {
     this->buffer = nullptr;
 }
 
-template <typename ItemType>
-Vector<ItemType>::Iterator::Iterator(ItemType *buffer) {
+template <typename ItemType, typename Compare>
+Vector<ItemType, Compare>::Iterator::Iterator(ItemType *buffer) {
     this->buffer = buffer;
 }
 
-template <typename ItemType>
-Vector<ItemType>::Iterator::Iterator(const Vector<ItemType>::Iterator &iterator) {
+template <typename ItemType, typename Compare>
+Vector<ItemType, Compare>::Iterator::Iterator(const Vector<ItemType, Compare>::Iterator &iterator) {
     this->buffer = iterator.buffer;
 }
 
-template <typename ItemType>
-typename Vector<ItemType>::Iterator& Vector<ItemType>::Iterator::operator=(const Vector<ItemType>::Iterator &iterator) {
+template <typename ItemType, typename Compare>
+typename Vector<ItemType, Compare>::Iterator& Vector<ItemType, Compare>::Iterator::operator=(const Vector<ItemType, Compare>::Iterator &iterator) {
     this->buffer = iterator.buffer;
 }
 
-template <typename ItemType>
-typename Vector<ItemType>::Iterator Vector<ItemType>::begin() {
-    return Vector<ItemType>::Iterator(this->buffer);
+template <typename ItemType, typename Compare>
+typename Vector<ItemType, Compare>::Iterator Vector<ItemType, Compare>::begin() {
+    return Vector<ItemType, Compare>::Iterator(this->buffer);
 }
 
-template <typename ItemType>
-typename Vector<ItemType>::Iterator Vector<ItemType>::end() {
-    return Vector<ItemType>::Iterator(this->buffer + this->size_);
+template <typename ItemType, typename Compare>
+typename Vector<ItemType, Compare>::Iterator Vector<ItemType, Compare>::end() {
+    return Vector<ItemType, Compare>::Iterator(this->buffer + this->size_);
 }
 
-template <typename ItemType>
-typename Vector<ItemType>::Iterator Vector<ItemType>::Iterator::operator++(int) {
+template <typename ItemType, typename Compare>
+typename Vector<ItemType, Compare>::Iterator Vector<ItemType, Compare>::Iterator::operator++(int) {
     auto iterator = *this;
 
     this->buffer++;
@@ -1034,15 +1008,15 @@ typename Vector<ItemType>::Iterator Vector<ItemType>::Iterator::operator++(int) 
     return iterator;
 }
 
-template <typename ItemType>
-typename Vector<ItemType>::Iterator Vector<ItemType>::Iterator::operator++() {
+template <typename ItemType, typename Compare>
+typename Vector<ItemType, Compare>::Iterator Vector<ItemType, Compare>::Iterator::operator++() {
     this->buffer++;
 
     return *this;
 }
 
-template <typename ItemType>
-typename Vector<ItemType>::Iterator Vector<ItemType>::Iterator::operator--(int) {
+template <typename ItemType, typename Compare>
+typename Vector<ItemType, Compare>::Iterator Vector<ItemType, Compare>::Iterator::operator--(int) {
     auto iterator = *this;
 
     this->buffer--;
@@ -1050,15 +1024,15 @@ typename Vector<ItemType>::Iterator Vector<ItemType>::Iterator::operator--(int) 
     return iterator;
 }
 
-template <typename ItemType>
-typename Vector<ItemType>::Iterator Vector<ItemType>::Iterator::operator--() {
+template <typename ItemType, typename Compare>
+typename Vector<ItemType, Compare>::Iterator Vector<ItemType, Compare>::Iterator::operator--() {
     this->buffer--;
 
     return *this;
 }
 
-template <typename ItemType>
-typename Vector<ItemType>::Iterator Vector<ItemType>::Iterator::operator+(ptrdiff_t x) {
+template <typename ItemType, typename Compare>
+typename Vector<ItemType, Compare>::Iterator Vector<ItemType, Compare>::Iterator::operator+(ptrdiff_t x) {
     auto iterator = *this;
 
     iterator.buffer += x;
@@ -1066,8 +1040,8 @@ typename Vector<ItemType>::Iterator Vector<ItemType>::Iterator::operator+(ptrdif
     return iterator;
 }
 
-template <typename ItemType>
-typename Vector<ItemType>::Iterator Vector<ItemType>::Iterator::operator-(ptrdiff_t x) {
+template <typename ItemType, typename Compare>
+typename Vector<ItemType, Compare>::Iterator Vector<ItemType, Compare>::Iterator::operator-(ptrdiff_t x) {
     auto iterator = *this;
 
     iterator.buffer -= x;
@@ -1075,101 +1049,101 @@ typename Vector<ItemType>::Iterator Vector<ItemType>::Iterator::operator-(ptrdif
     return iterator;
 }
 
-template <typename ItemType>
-ptrdiff_t Vector<ItemType>::Iterator::operator-(const typename Vector<ItemType>::Iterator& iterator) const {
+template <typename ItemType, typename Compare>
+ptrdiff_t Vector<ItemType, Compare>::Iterator::operator-(const typename Vector<ItemType, Compare>::Iterator& iterator) const {
     return this->buffer - iterator.buffer;
 }
 
-template <typename ItemType>
-typename Vector<ItemType>::Iterator Vector<ItemType>::Iterator::operator+=(ptrdiff_t x) {
+template <typename ItemType, typename Compare>
+typename Vector<ItemType, Compare>::Iterator Vector<ItemType, Compare>::Iterator::operator+=(ptrdiff_t x) {
     this->buffer += x;
 
     return *this;
 }
 
-template <typename ItemType>
-typename Vector<ItemType>::Iterator Vector<ItemType>::Iterator::operator-=(ptrdiff_t x) {
+template <typename ItemType, typename Compare>
+typename Vector<ItemType, Compare>::Iterator Vector<ItemType, Compare>::Iterator::operator-=(ptrdiff_t x) {
     this->buffer -= x;
 
     return *this;
 }
 
-template <typename ItemType>
-ItemType& Vector<ItemType>::Iterator::operator*() {
+template <typename ItemType, typename Compare>
+ItemType& Vector<ItemType, Compare>::Iterator::operator*() {
     return *this->buffer;
 }
 
-template <typename ItemType>
-ItemType* Vector<ItemType>::Iterator::operator->() {
+template <typename ItemType, typename Compare>
+ItemType* Vector<ItemType, Compare>::Iterator::operator->() {
     return this->buffer;
 }
 
-template <typename ItemType>
-ItemType& Vector<ItemType>::Iterator::operator[](ptrdiff_t index) const {
+template <typename ItemType, typename Compare>
+ItemType& Vector<ItemType, Compare>::Iterator::operator[](ptrdiff_t index) const {
     return *(this->buffer + index);
 }
 
-template <typename ItemType>
-bool Vector<ItemType>::Iterator::operator==(const Iterator &iterator) const {
+template <typename ItemType, typename Compare>
+bool Vector<ItemType, Compare>::Iterator::operator==(const Iterator &iterator) const {
     return this->buffer == iterator.buffer;
 }
 
-template <typename ItemType>
-bool Vector<ItemType>::Iterator::operator!=(const Iterator &iterator) const {
+template <typename ItemType, typename Compare>
+bool Vector<ItemType, Compare>::Iterator::operator!=(const Iterator &iterator) const {
     return this->buffer != iterator.buffer;
 }
 
-template <typename ItemType>
-bool Vector<ItemType>::Iterator::operator<(const Iterator &iterator) const {
+template <typename ItemType, typename Compare>
+bool Vector<ItemType, Compare>::Iterator::operator<(const Iterator &iterator) const {
     return (*this - iterator < 0) ? true : false;
 }
 
-template <typename ItemType>
-bool Vector<ItemType>::Iterator::operator>(const Iterator &iterator) const {
+template <typename ItemType, typename Compare>
+bool Vector<ItemType, Compare>::Iterator::operator>(const Iterator &iterator) const {
     return (*this - iterator > 0) ? true : false;
 }
 
-template <typename ItemType>
-bool Vector<ItemType>::Iterator::operator<=(const Iterator &iterator) const {
+template <typename ItemType, typename Compare>
+bool Vector<ItemType, Compare>::Iterator::operator<=(const Iterator &iterator) const {
     return (*this - iterator <= 0) ? true : false;
 }
-template <typename ItemType>
-bool Vector<ItemType>::Iterator::operator>=(const Iterator &iterator) const {
+template <typename ItemType, typename Compare>
+bool Vector<ItemType, Compare>::Iterator::operator>=(const Iterator &iterator) const {
     return (*this - iterator >= 0) ? true : false;
 }
 
-template <typename ItemType>
-Vector<ItemType>::ConstIterator::ConstIterator() {
+template <typename ItemType, typename Compare>
+Vector<ItemType, Compare>::ConstIterator::ConstIterator() {
     this->buffer = nullptr;
 }
 
-template <typename ItemType>
-Vector<ItemType>::ConstIterator::ConstIterator(ItemType *buffer) {
+template <typename ItemType, typename Compare>
+Vector<ItemType, Compare>::ConstIterator::ConstIterator(ItemType *buffer) {
     this->buffer = buffer;
 }
 
-template <typename ItemType>
-Vector<ItemType>::ConstIterator::ConstIterator(const Vector<ItemType>::ConstIterator &iterator) {
+template <typename ItemType, typename Compare>
+Vector<ItemType, Compare>::ConstIterator::ConstIterator(const Vector<ItemType, Compare>::ConstIterator &iterator) {
     this->buffer = iterator.buffer;
 }
 
-template <typename ItemType>
-typename Vector<ItemType>::ConstIterator& Vector<ItemType>::ConstIterator::operator=(const Vector<ItemType>::ConstIterator &iterator) {
+template <typename ItemType, typename Compare>
+typename Vector<ItemType, Compare>::ConstIterator& Vector<ItemType, Compare>::ConstIterator::operator=(const Vector<ItemType, Compare>::ConstIterator &iterator) {
     this->buffer = iterator.buffer;
 }
 
-template <typename ItemType>
-typename Vector<ItemType>::ConstIterator Vector<ItemType>::cbegin() const {
-    return Vector<ItemType>::ConstIterator(this->buffer);
+template <typename ItemType, typename Compare>
+typename Vector<ItemType, Compare>::ConstIterator Vector<ItemType, Compare>::cbegin() const {
+    return Vector<ItemType, Compare>::ConstIterator(this->buffer);
 }
 
-template <typename ItemType>
-typename Vector<ItemType>::ConstIterator Vector<ItemType>::cend() const {
-    return Vector<ItemType>::ConstIterator(this->buffer + this->size_);
+template <typename ItemType, typename Compare>
+typename Vector<ItemType, Compare>::ConstIterator Vector<ItemType, Compare>::cend() const {
+    return Vector<ItemType, Compare>::ConstIterator(this->buffer + this->size_);
 }
 
-template <typename ItemType>
-typename Vector<ItemType>::ConstIterator Vector<ItemType>::ConstIterator::operator++(int) {
+template <typename ItemType, typename Compare>
+typename Vector<ItemType, Compare>::ConstIterator Vector<ItemType, Compare>::ConstIterator::operator++(int) {
     ConstIterator iterator = *this;
 
     this->buffer++;
@@ -1177,15 +1151,15 @@ typename Vector<ItemType>::ConstIterator Vector<ItemType>::ConstIterator::operat
     return iterator;
 }
 
-template <typename ItemType>
-typename Vector<ItemType>::ConstIterator Vector<ItemType>::ConstIterator::operator++() {
+template <typename ItemType, typename Compare>
+typename Vector<ItemType, Compare>::ConstIterator Vector<ItemType, Compare>::ConstIterator::operator++() {
     this->buffer++;
 
     return *this;
 }
 
-template <typename ItemType>
-typename Vector<ItemType>::ConstIterator Vector<ItemType>::ConstIterator::operator--(int) {
+template <typename ItemType, typename Compare>
+typename Vector<ItemType, Compare>::ConstIterator Vector<ItemType, Compare>::ConstIterator::operator--(int) {
     auto iterator = *this;
 
     this->buffer--;
@@ -1193,15 +1167,15 @@ typename Vector<ItemType>::ConstIterator Vector<ItemType>::ConstIterator::operat
     return iterator;
 }
 
-template <typename ItemType>
-typename Vector<ItemType>::ConstIterator Vector<ItemType>::ConstIterator::operator--() {
+template <typename ItemType, typename Compare>
+typename Vector<ItemType, Compare>::ConstIterator Vector<ItemType, Compare>::ConstIterator::operator--() {
     this->buffer--;
 
     return *this;
 }
 
-template <typename ItemType>
-typename Vector<ItemType>::ConstIterator Vector<ItemType>::ConstIterator::operator+(ptrdiff_t x) {
+template <typename ItemType, typename Compare>
+typename Vector<ItemType, Compare>::ConstIterator Vector<ItemType, Compare>::ConstIterator::operator+(ptrdiff_t x) {
     auto iterator = *this;
 
     iterator.buffer += x;
@@ -1209,8 +1183,8 @@ typename Vector<ItemType>::ConstIterator Vector<ItemType>::ConstIterator::operat
     return iterator;
 }
 
-template <typename ItemType>
-typename Vector<ItemType>::ConstIterator Vector<ItemType>::ConstIterator::operator-(ptrdiff_t x) {
+template <typename ItemType, typename Compare>
+typename Vector<ItemType, Compare>::ConstIterator Vector<ItemType, Compare>::ConstIterator::operator-(ptrdiff_t x) {
     auto iterator = *this;
 
     iterator.buffer -= x;
@@ -1218,65 +1192,65 @@ typename Vector<ItemType>::ConstIterator Vector<ItemType>::ConstIterator::operat
     return iterator;
 }
 
-template <typename ItemType>
-ptrdiff_t Vector<ItemType>::ConstIterator::operator-(const typename Vector<ItemType>::ConstIterator& iterator) const {
+template <typename ItemType, typename Compare>
+ptrdiff_t Vector<ItemType, Compare>::ConstIterator::operator-(const typename Vector<ItemType, Compare>::ConstIterator& iterator) const {
     return this->buffer - iterator.buffer;
 }
 
-template <typename ItemType>
-typename Vector<ItemType>::ConstIterator Vector<ItemType>::ConstIterator::operator+=(ptrdiff_t x) {
+template <typename ItemType, typename Compare>
+typename Vector<ItemType, Compare>::ConstIterator Vector<ItemType, Compare>::ConstIterator::operator+=(ptrdiff_t x) {
     this->buffer += x;
 
     return *this;
 }
 
-template <typename ItemType>
-typename Vector<ItemType>::ConstIterator Vector<ItemType>::ConstIterator::operator-=(ptrdiff_t x) {
+template <typename ItemType, typename Compare>
+typename Vector<ItemType, Compare>::ConstIterator Vector<ItemType, Compare>::ConstIterator::operator-=(ptrdiff_t x) {
     this->buffer -= x;
 
     return *this;
 }
 
-template <typename ItemType>
-const ItemType& Vector<ItemType>::ConstIterator::operator*() const {
+template <typename ItemType, typename Compare>
+const ItemType& Vector<ItemType, Compare>::ConstIterator::operator*() const {
     return *this->buffer;
 }
 
-template <typename ItemType>
-const ItemType& Vector<ItemType>::ConstIterator::operator[](ptrdiff_t index) const {
+template <typename ItemType, typename Compare>
+const ItemType& Vector<ItemType, Compare>::ConstIterator::operator[](ptrdiff_t index) const {
     return *(this->buffer + index);
 }
 
-template <typename ItemType>
-const ItemType* Vector<ItemType>::ConstIterator::operator->() const {
+template <typename ItemType, typename Compare>
+const ItemType* Vector<ItemType, Compare>::ConstIterator::operator->() const {
     return this->buffer;
 }
 
-template <typename ItemType>
-bool Vector<ItemType>::ConstIterator::operator==(const ConstIterator &iterator) const {
+template <typename ItemType, typename Compare>
+bool Vector<ItemType, Compare>::ConstIterator::operator==(const ConstIterator &iterator) const {
     return this->buffer == iterator.buffer;
 }
 
-template <typename ItemType>
-bool Vector<ItemType>::ConstIterator::operator!=(const ConstIterator &iterator) const {
+template <typename ItemType, typename Compare>
+bool Vector<ItemType, Compare>::ConstIterator::operator!=(const ConstIterator &iterator) const {
     return this->buffer != iterator.buffer;
 }
 
-template <typename ItemType>
-bool Vector<ItemType>::ConstIterator::operator<(const ConstIterator &iterator) const {
+template <typename ItemType, typename Compare>
+bool Vector<ItemType, Compare>::ConstIterator::operator<(const ConstIterator &iterator) const {
     return (*this - iterator < 0) ? true : false;
 }
 
-template <typename ItemType>
-bool Vector<ItemType>::ConstIterator::operator>(const ConstIterator &iterator) const {
+template <typename ItemType, typename Compare>
+bool Vector<ItemType, Compare>::ConstIterator::operator>(const ConstIterator &iterator) const {
     return (*this - iterator > 0) ? true : false;
 }
 
-template <typename ItemType>
-bool Vector<ItemType>::ConstIterator::operator<=(const ConstIterator &iterator) const {
+template <typename ItemType, typename Compare>
+bool Vector<ItemType, Compare>::ConstIterator::operator<=(const ConstIterator &iterator) const {
     return (*this - iterator <= 0) ? true : false;
 }
-template <typename ItemType>
-bool Vector<ItemType>::ConstIterator::operator>=(const ConstIterator &iterator) const {
+template <typename ItemType, typename Compare>
+bool Vector<ItemType, Compare>::ConstIterator::operator>=(const ConstIterator &iterator) const {
     return (*this - iterator >= 0) ? true : false;
 }
