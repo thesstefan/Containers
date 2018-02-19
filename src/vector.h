@@ -668,6 +668,9 @@ Vector<ItemType>::Vector(size_t count) {
     this->size_ = count;
 
     this->buffer = new ItemType[count];
+
+    for (auto it = this->begin(); it != this->end(); it++)
+        *it = ItemType();
 }
 
 template <typename ItemType> 
@@ -733,7 +736,7 @@ void Vector<ItemType>::assign(IteratorType first, IteratorType last) {
 template <typename ItemType>
 ItemType& Vector<ItemType>::at(size_t index) {
     if (index < 0 || index >= this->size_)
-        throw std::out_of_range("Index is out of range in Vector::at(size_t index)");
+        throw std::out_of_range("std::out_of_range : Vector::at(size_t index)");
 
     return this->buffer[index];
 }
@@ -741,7 +744,7 @@ ItemType& Vector<ItemType>::at(size_t index) {
 template <typename ItemType>
 const ItemType& Vector<ItemType>::at(size_t index) const {
     if (index < 0 || index >= this->size_)
-        throw std::out_of_range("Index is out of range in Vector::at(size_t index)");
+        throw std::out_of_range("std::out_of_range : Vector::at(size_t index) const");
 
     return this->buffer[index];
 }
@@ -1034,7 +1037,7 @@ typename Vector<ItemType>::Iterator Vector<ItemType>::end() {
 }
 
 template <typename ItemType>
-typename Vector<ItemType>::Iterator Vector<ItemType>::Iterator::operator++() {
+typename Vector<ItemType>::Iterator Vector<ItemType>::Iterator::operator++(int) {
     auto iterator = *this;
 
     this->buffer++;
@@ -1043,14 +1046,14 @@ typename Vector<ItemType>::Iterator Vector<ItemType>::Iterator::operator++() {
 }
 
 template <typename ItemType>
-typename Vector<ItemType>::Iterator Vector<ItemType>::Iterator::operator++(int) {
+typename Vector<ItemType>::Iterator Vector<ItemType>::Iterator::operator++() {
     this->buffer++;
 
     return *this;
 }
 
 template <typename ItemType>
-typename Vector<ItemType>::Iterator Vector<ItemType>::Iterator::operator--() {
+typename Vector<ItemType>::Iterator Vector<ItemType>::Iterator::operator--(int) {
     auto iterator = *this;
 
     this->buffer--;
@@ -1059,7 +1062,7 @@ typename Vector<ItemType>::Iterator Vector<ItemType>::Iterator::operator--() {
 }
 
 template <typename ItemType>
-typename Vector<ItemType>::Iterator Vector<ItemType>::Iterator::operator--(int) {
+typename Vector<ItemType>::Iterator Vector<ItemType>::Iterator::operator--() {
     this->buffer--;
 
     return *this;
@@ -1177,7 +1180,7 @@ typename Vector<ItemType>::ConstIterator Vector<ItemType>::cend() const {
 }
 
 template <typename ItemType>
-typename Vector<ItemType>::ConstIterator Vector<ItemType>::ConstIterator::operator++() {
+typename Vector<ItemType>::ConstIterator Vector<ItemType>::ConstIterator::operator++(int) {
     ConstIterator iterator = *this;
 
     this->buffer++;
@@ -1186,14 +1189,14 @@ typename Vector<ItemType>::ConstIterator Vector<ItemType>::ConstIterator::operat
 }
 
 template <typename ItemType>
-typename Vector<ItemType>::ConstIterator Vector<ItemType>::ConstIterator::operator++(int) {
+typename Vector<ItemType>::ConstIterator Vector<ItemType>::ConstIterator::operator++() {
     this->buffer++;
 
     return *this;
 }
 
 template <typename ItemType>
-typename Vector<ItemType>::ConstIterator Vector<ItemType>::ConstIterator::operator--() {
+typename Vector<ItemType>::ConstIterator Vector<ItemType>::ConstIterator::operator--(int) {
     auto iterator = *this;
 
     this->buffer--;
@@ -1202,7 +1205,7 @@ typename Vector<ItemType>::ConstIterator Vector<ItemType>::ConstIterator::operat
 }
 
 template <typename ItemType>
-typename Vector<ItemType>::ConstIterator Vector<ItemType>::ConstIterator::operator--(int) {
+typename Vector<ItemType>::ConstIterator Vector<ItemType>::ConstIterator::operator--() {
     this->buffer--;
 
     return *this;
