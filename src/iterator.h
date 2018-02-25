@@ -175,73 +175,41 @@ class NormalIterator {
             return Self(this->current - x);
         }
 
+        difference_type operator-(const Self& other) {
+            return this->current - other.current;
+        }
+
         const Iterator& base() const {
             return this->current;
         }
 
-        template <typename IteratorLeft, typename IteratorRight>
-        bool operator==(const NormalIterator<IteratorLeft, Container> &left,
-                        const NormalIterator<IteratorRight, Container> &right) {
-            return left.base() == right.base();
+        template <typename IteratorOther>
+        bool operator==(const NormalIterator<IteratorOther, Container> &other) {
+            return this->base() == other.base();
         }
 
-        bool operator==(const Self &left,
-                        const Self &right) {
-            return left.base() == right.base();
+        template <typename IteratorOther>
+        bool operator!=(const NormalIterator<IteratorOther, Container> &other) {
+            return this->base() != other.base();
         }
 
-        template <typename IteratorLeft, typename IteratorRight>
-        bool operator!=(const NormalIterator<IteratorLeft, Container> &left,
-                        const NormalIterator<IteratorRight, Container> &right) {
-            return left.base() != right.base();
+        template <typename IteratorOther>
+        bool operator<(const NormalIterator<IteratorOther, Container> &other) {
+            return this->base() < other.base();
         }
 
-        bool operator!=(const Self &left,
-                        const Self &right) {
-            return left.base() != right.base();
-        } 
-
-        template <typename IteratorLeft, typename IteratorRight>
-        bool operator<(const NormalIterator<IteratorLeft, Container> &left,
-                        const NormalIterator<IteratorRight, Container> &right) {
-            return left.base() < right.base();
+        template <typename IteratorOther>
+        bool operator>(const NormalIterator<IteratorOther, Container> &other) {
+            return this->base() > other.base();
         }
 
-        bool operator<(const Self &left,
-                        const Self &right) {
-            return left.base() < right.base();
+        template <typename IteratorOther>
+        bool operator<=(const NormalIterator<IteratorOther, Container> &other) {
+            return this->base() <= other.base();
         }
 
-        template <typename IteratorLeft, typename IteratorRight>
-        bool operator>(const NormalIterator<IteratorLeft, Container> &left,
-                        const NormalIterator<IteratorRight, Container> &right) {
-            return left.base() > right.base();
-        }
-
-        bool operator>(const Self &left,
-                        const Self &right) {
-            return left.base() > right.base();
-        }
-
-        template <typename IteratorLeft, typename IteratorRight>
-        bool operator<=(const NormalIterator<IteratorLeft, Container> &left,
-                        const NormalIterator<IteratorRight, Container> &right) {
-            return left.base() <= right.base();
-        }
-
-        bool operator<=(const Self &left,
-                        const Self &right) {
-            return left.base() <= right.base();
-        }
-
-        template <typename IteratorLeft, typename IteratorRight>
-        bool operator>=(const NormalIterator<IteratorLeft, Container> &left,
-                        const NormalIterator<IteratorRight, Container> &right) {
-            return left.base() >= right.base();
-        }
-
-        bool operator>=(const Self &left,
-                        const Self &right) {
-            return left.base() >= right.base();
+        template <typename IteratorOther>
+        bool operator>=(const NormalIterator<IteratorOther, Container> &other) {
+            return this->base() >= other.base();
         }
 };
